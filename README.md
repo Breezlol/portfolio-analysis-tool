@@ -16,5 +16,5 @@ The system focuses on explainable statistical risk analysis rather than market p
 - Portfolio tracking with cash and holdings  
 - Risk indicator based on portfolio volatility  
 - Modular analytics engine for financial metrics  
-- Support for historical price data (CSV / API)  
+- Support for historical price data via Alpha Vantage API
 - Extensible architecture for future features  
