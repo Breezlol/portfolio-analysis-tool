@@ -33,24 +33,11 @@ public class Stock {
             throw new IllegalArgumentException("Stock price cannot be negative");
         }
         this.currentPrice = newPrice;
-    }
+          }
     
     @Override
     public String toString() {
         return String.format("Stock[%s - %s, Price: $%.2f]", 
                            symbol, companyName, currentPrice);
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Stock other = (Stock) obj;
-        return symbol.equals(other.symbol);
-    }
-    
-    @Override
-    public int hashCode() {
-        return symbol.hashCode();
     }
 }

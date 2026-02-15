@@ -17,10 +17,6 @@ public class MainApp {
         System.out.println("\nAfter price update:");
         System.out.println(apple);
         
-        // Access individual properties
-        System.out.println("\nStock details:");
-        System.out.println("Symbol: " + apple.getSymbol());
-        System.out.println("Company: " + apple.getCompanyName());
-        System.out.println("Price: $" + apple.getCurrentPrice());
+        System.out.println("\nStock class testing complete!");
     }
 }
