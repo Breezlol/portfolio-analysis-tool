@@ -1,3 +1,6 @@
+package com.portfolio.entity;
+
+import com.portfolio.model.Stock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
