@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Portfolio {
     private double accountBalance;
-    private List<Stock> holdings = new ArrayList<>();
+    private List<PortfolioItem> holdings = new ArrayList<>();
 
     public Portfolio(double accountBalance) {
         if (accountBalance < 0)
@@ -20,12 +20,12 @@ public class Portfolio {
         if (cost > accountBalance)
             throw new IllegalArgumentException("Insufficient balance");
         accountBalance -= cost;
-        holdings.add(stock);
+        holdings.add(new PortfolioItem(stock.getSymbol(), quantity, stock.getCurrentPrice()));
     }
 
     public double getTotalValue() {
         return holdings.stream()
-                .mapToDouble(Stock::getCurrentPrice)
+                .mapToDouble(PortfolioItem::getTotalCost)
                 .sum();
     }
 
@@ -33,7 +33,7 @@ public class Portfolio {
         return accountBalance;
     }
 
-    public List<Stock> getHoldings() {
+    public List<PortfolioItem> getHoldings() {
         return Collections.unmodifiableList(holdings);
     }
 
