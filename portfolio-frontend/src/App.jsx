@@ -4,12 +4,21 @@ export default function App() {
   const [page, setPage] = useState('landing');
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ name: '', age: '', sex: '', employmentStatus: '', incomeRange: '', depositAmount: '' });
+  const [query, setQuery] = useState('');
+  const [portfolio, setPortfolio] = useState([]);
 
   const set = (key, val) => setForm({ ...form, [key]: val });
 
   const handleCreate = (e) => {
     e.preventDefault();
     setPage('portfolio');
+  };
+
+  const addStock = () => {
+    if (query.trim()) {
+      setPortfolio([...portfolio, { symbol: query.trim().toUpperCase(), quantity: 1 }]);
+      setQuery('');
+    }
   };
 
   useEffect(() => {
@@ -47,6 +56,13 @@ export default function App() {
   if (page === 'portfolio') return (
     <div>
       <h2>Portfolio Builder</h2>
+      <input placeholder="Search stock (e.g. AAPL)" value={query} onChange={e => setQuery(e.target.value)} />
+      <button onClick={addStock}>Add</button>
+      <ul>
+        {portfolio.map((s, i) => (
+          <li key={i}>{s.symbol} <button onClick={() => setPortfolio(portfolio.filter((_, j) => j !== i))}>Remove</button></li>
+        ))}
+      </ul>
       <button onClick={() => setPage('landing')}>Back</button>
     </div>
   );
