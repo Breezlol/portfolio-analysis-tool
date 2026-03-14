@@ -50,4 +50,15 @@ public class AVLTree {
         }
         return n;
     }
+
+    public void insert(PortfolioItem item) { root = insert(root, item); }
+
+    private Node insert(Node n, PortfolioItem item) {
+        if (n == null) return new Node(item);
+        int cmp = item.getSymbol().compareTo(n.item.getSymbol());
+        if (cmp < 0) n.left = insert(n.left, item);
+        else if (cmp > 0) n.right = insert(n.right, item);
+        else n.item = item;
+        return balance(n);
+    }
 }
