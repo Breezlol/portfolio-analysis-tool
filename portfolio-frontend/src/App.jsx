@@ -5,6 +5,7 @@ export default function App() {
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ name: '', age: '', sex: '', employmentStatus: '', incomeRange: '', depositAmount: '' });
   const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
   const [saved, setSaved] = useState(false);
 
@@ -15,11 +16,19 @@ export default function App() {
     setPage('portfolio');
   };
 
-  const addStock = () => {
-    if (query.trim()) {
-      setPortfolio([...portfolio, { symbol: query.trim().toUpperCase(), quantity: 1 }]);
-      setQuery('');
+  const searchStocks = async () => {
+    if (!query.trim()) return;
+    const res = await fetch('/stocks/search?q=' + query.trim());
+    const data = await res.json();
+    setSearchResults(data.bestMatches || []);
+  };
+
+  const addStock = (symbol, name) => {
+    if (!portfolio.find(s => s.symbol === symbol)) {
+      setPortfolio([...portfolio, { symbol, name, quantity: 1 }]);
     }
+    setSearchResults([]);
+    setQuery('');
   };
 
   useEffect(() => {
@@ -58,10 +67,18 @@ export default function App() {
     <div>
       <h2>Portfolio Builder</h2>
       <input placeholder="Search stock (e.g. AAPL)" value={query} onChange={e => setQuery(e.target.value)} />
-      <button onClick={addStock}>Add</button>
+      <button onClick={searchStocks}>Search</button>
+      {searchResults.length > 0 && (
+        <ul>
+          {searchResults.map(r => (
+            <li key={r['1. symbol']}>{r['1. symbol']} - {r['2. name']} <button onClick={() => addStock(r['1. symbol'], r['2. name'])}>Add</button></li>
+          ))}
+        </ul>
+      )}
+      <h3>My Portfolio</h3>
       <ul>
         {portfolio.map((s, i) => (
-          <li key={i}>{s.symbol} <button onClick={() => setPortfolio(portfolio.filter((_, j) => j !== i))}>Remove</button></li>
+          <li key={i}>{s.symbol} - {s.name} <button onClick={() => setPortfolio(portfolio.filter((_, j) => j !== i))}>Remove</button></li>
         ))}
       </ul>
       <button onClick={async () => {

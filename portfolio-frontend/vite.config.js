@@ -6,7 +6,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/users': 'http://localhost:8080',
-      '/portfolios': 'http://localhost:8080'
+      '/portfolios': 'http://localhost:8080',
+      '/stocks': 'http://localhost:8080'
     }
   }
 });
