@@ -6,6 +6,7 @@ export default function App() {
   const [form, setForm] = useState({ name: '', age: '', sex: '', employmentStatus: '', incomeRange: '', depositAmount: '' });
   const [query, setQuery] = useState('');
   const [portfolio, setPortfolio] = useState([]);
+  const [saved, setSaved] = useState(false);
 
   const set = (key, val) => setForm({ ...form, [key]: val });
 
@@ -45,7 +46,7 @@ export default function App() {
   if (page === 'load') return (
     <div>
       <h2>Select User</h2>
-      <select onChange={e => { setPage('portfolio'); }} defaultValue="">
+      <select onChange={() => { setPage('portfolio'); }} defaultValue="">
         <option value="">-- Select --</option>
         {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
       </select>
@@ -63,6 +64,15 @@ export default function App() {
           <li key={i}>{s.symbol} <button onClick={() => setPortfolio(portfolio.filter((_, j) => j !== i))}>Remove</button></li>
         ))}
       </ul>
+      <button onClick={async () => {
+        await fetch('/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...form, age: Number(form.age), depositAmount: Number(form.depositAmount) })
+        });
+        setSaved(true);
+      }}>Save</button>
+      {saved && <span> Saved!</span>}
       <button onClick={() => setPage('landing')}>Back</button>
     </div>
   );
