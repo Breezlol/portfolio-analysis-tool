@@ -45,7 +45,15 @@ export default function App() {
           <option value="">-- Sex --</option><option>Male</option><option>Female</option><option>Other</option>
         </select><br/>
         <input placeholder="Employment Status" value={form.employmentStatus} onChange={e => set('employmentStatus', e.target.value)} required /><br/>
-        <input placeholder="Income Range" value={form.incomeRange} onChange={e => set('incomeRange', e.target.value)} required /><br/>
+        <select value={form.incomeRange} onChange={e => set('incomeRange', e.target.value)} required>
+          <option value="">-- Yearly Income Range --</option>
+          <option>{'< 10,000'}</option>
+          <option>10,000 - 20,000</option>
+          <option>20,000 - 50,000</option>
+          <option>50,000 - 100,000</option>
+          <option>100,000 - 200,000</option>
+          <option>{'> 200,000'}</option>
+        </select><br/>
         <input placeholder="Deposit Amount" type="number" min="0" value={form.depositAmount} onChange={e => set('depositAmount', e.target.value)} required /><br/>
         <button type="submit">Create</button> <button type="button" onClick={() => setPage('landing')}>Back</button>
       </form>
