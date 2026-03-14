@@ -44,7 +44,16 @@ export default function App() {
         <select value={form.sex} onChange={e => set('sex', e.target.value)} required>
           <option value="">-- Sex --</option><option>Male</option><option>Female</option><option>Other</option>
         </select><br/>
-        <input placeholder="Employment Status" value={form.employmentStatus} onChange={e => set('employmentStatus', e.target.value)} required /><br/>
+        <select value={form.employmentStatus} onChange={e => set('employmentStatus', e.target.value)} required>
+          <option value="">-- Employment Status --</option>
+          <option>Unemployed</option>
+          <option>Student</option>
+          <option>Part-time employed</option>
+          <option>Full-time employed</option>
+          <option>Self-employed</option>
+          <option>Retired</option>
+          <option>Other</option>
+        </select><br/>
         <select value={form.incomeRange} onChange={e => set('incomeRange', e.target.value)} required>
           <option value="">-- Yearly Income Range --</option>
           <option>{'< 10,000'}</option>
