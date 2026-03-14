@@ -61,4 +61,49 @@ public class AVLTree {
         else n.item = item;
         return balance(n);
     }
+
+    public void remove(String symbol) { root = remove(root, symbol); }
+
+    private Node remove(Node n, String symbol) {
+        if (n == null) return null;
+        int cmp = symbol.compareTo(n.item.getSymbol());
+        if (cmp < 0) n.left = remove(n.left, symbol);
+        else if (cmp > 0) n.right = remove(n.right, symbol);
+        else {
+            if (n.left == null) return n.right;
+            if (n.right == null) return n.left;
+            Node min = n.right;
+            while (min.left != null) min = min.left;
+            n.item = min.item;
+            n.right = remove(n.right, min.item.getSymbol());
+        }
+        return balance(n);
+    }
+
+    public PortfolioItem find(String symbol) {
+        Node n = root;
+        while (n != null) {
+            int cmp = symbol.compareTo(n.item.getSymbol());
+            if (cmp == 0) return n.item;
+            n = cmp < 0 ? n.left : n.right;
+        }
+        return null;
+    }
+
+    public List<PortfolioItem> getItemsSorted() {
+        List<PortfolioItem> result = new ArrayList<>();
+        inOrder(root, result);
+        return result;
+    }
+
+    private void inOrder(Node n, List<PortfolioItem> result) {
+        if (n == null) return;
+        inOrder(n.left, result);
+        result.add(n.item);
+        inOrder(n.right, result);
+    }
+
+    public int size() { return size(root); }
+    private int size(Node n) { return n == null ? 0 : 1 + size(n.left) + size(n.right); }
+    public boolean isEmpty() { return root == null; }
 }
