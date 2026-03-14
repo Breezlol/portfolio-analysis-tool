@@ -71,4 +71,14 @@ public class UserRepository {
         user.setId(keyHolder.getKey().longValue());
         return user;
     }
+
+    public User update(User user) {
+        jdbcTemplate.update(
+                "UPDATE users SET name=?, age=?, sex=?, employment_status=?, income_range=?, deposit_amount=? WHERE id=?",
+                user.getName(), user.getAge(), user.getSex(),
+                user.getEmploymentStatus(), user.getIncomeRange(),
+                user.getDepositAmount(), user.getId()
+        );
+        return user;
+    }
 }

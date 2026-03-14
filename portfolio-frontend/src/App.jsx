@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 export default function App() {
   const [page, setPage] = useState('landing');
+  const [userId, setUserId] = useState(null);
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ name: '', age: '', sex: '', employmentStatus: '', incomeRange: '', depositAmount: '' });
   const [query, setQuery] = useState('');
@@ -72,7 +73,15 @@ export default function App() {
   if (page === 'load') return (
     <div>
       <h2>Select User</h2>
-      <select onChange={() => { setPage('portfolio'); }} defaultValue="">
+      <select onChange={async (e) => {
+        const id = e.target.value;
+        if (!id) return;
+        const res = await fetch('/users/' + id);
+        const u = await res.json();
+        setUserId(u.id);
+        setForm({ name: u.name, age: u.age, sex: u.sex, employmentStatus: u.employmentStatus, incomeRange: u.incomeRange, depositAmount: u.depositAmount });
+        setPage('portfolio');
+      }} defaultValue="">
         <option value="">-- Select --</option>
         {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
       </select>
@@ -99,11 +108,14 @@ export default function App() {
         ))}
       </ul>
       <button onClick={async () => {
-        await fetch('/users', {
-          method: 'POST',
+        const url = userId ? '/users/' + userId : '/users';
+        const method = userId ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...form, age: Number(form.age), depositAmount: Number(form.depositAmount) })
         });
+        if (!userId) { const u = await res.json(); setUserId(u.id); }
         setSaved(true);
       }}>Save</button>
       {saved && <span> Saved!</span>}
