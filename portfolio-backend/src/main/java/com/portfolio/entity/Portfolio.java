@@ -1,13 +1,12 @@
 package com.portfolio.entity;
 
+import com.portfolio.datastructure.AVLTree;
 import com.portfolio.model.Stock;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Portfolio {
     private double accountBalance;
-    private List<PortfolioItem> holdings = new ArrayList<>();
+    private AVLTree holdings = new AVLTree();
 
     public Portfolio(double accountBalance) {
         if (accountBalance < 0)
@@ -20,13 +19,15 @@ public class Portfolio {
         if (cost > accountBalance)
             throw new IllegalArgumentException("Insufficient balance");
         accountBalance -= cost;
-        holdings.add(new PortfolioItem(stock.getSymbol(), quantity, stock.getCurrentPrice()));
+        holdings.insert(new PortfolioItem(stock.getSymbol(), quantity, stock.getCurrentPrice()));
     }
 
     public double getTotalValue() {
-        return holdings.stream()
-                .mapToDouble(PortfolioItem::getTotalCost)
-                .sum();
+        double total = 0;
+        for (PortfolioItem item : holdings.getItemsSorted()) {
+            total += item.getTotalCost();
+        }
+        return total;
     }
 
     public double getAccountBalance() {
@@ -34,7 +35,7 @@ public class Portfolio {
     }
 
     public List<PortfolioItem> getHoldings() {
-        return Collections.unmodifiableList(holdings);
+        return holdings.getItemsSorted();
     }
 
     @Override
