@@ -41,10 +41,12 @@ export default function App() {
     setSearchResults(data.bestMatches || []);
   };
 
-  const addStock = (symbol, name) => {
-    if (!portfolio.find(s => s.symbol === symbol)) {
-      setPortfolio([...portfolio, { symbol, name, quantity: 1, purchasePrice: 0 }]);
-    }
+  const addStock = async (symbol, name) => {
+    if (portfolio.find(s => s.symbol === symbol)) return;
+    // fetch the current price from the backend
+    const res = await fetch('/stocks/quote?symbol=' + symbol);
+    const price = res.ok ? await res.json() : 0;
+    setPortfolio([...portfolio, { symbol, name, quantity: 1, purchasePrice: price }]);
     setSearchResults([]);
     setQuery('');
   };
@@ -157,7 +159,11 @@ export default function App() {
             {portfolio.map((s, i) => (
               <tr key={i}>
                 <td>{s.symbol}</td>
-                <td>{s.quantity}</td>
+                <td><input type="number" min="1" value={s.quantity} style={{width:'60px'}} onChange={e => {
+                  const updated = [...portfolio];
+                  updated[i] = { ...updated[i], quantity: Math.max(1, Number(e.target.value)) };
+                  setPortfolio(updated);
+                }} /></td>
                 <td>${s.purchasePrice.toFixed(2)}</td>
                 <td><button onClick={() => setPortfolio(portfolio.filter((_, j) => j !== i))}>Remove</button></td>
               </tr>
