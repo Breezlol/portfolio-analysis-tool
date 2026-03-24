@@ -11,6 +11,21 @@ export default function App() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [valueData, setValueData] = useState(null);
+  const [valueLoading, setValueLoading] = useState(false);
+
+  const fetchPortfolioValue = async (uid) => {
+    if (!uid) return;
+    setValueLoading(true);
+    try {
+      const res = await fetch('/users/' + uid + '/portfolio/value');
+      if (res.ok) setValueData(await res.json());
+    } catch (e) {
+      setValueData(null);
+    } finally {
+      setValueLoading(false);
+    }
+  };
 
   const set = (key, val) => setForm({ ...form, [key]: val });
 
@@ -89,6 +104,7 @@ export default function App() {
           const pRes = await fetch('/users/' + id + '/portfolio');
           const pItems = pRes.ok ? await pRes.json() : [];
           setPortfolio(pItems.map(p => ({ symbol: p.symbol, name: p.symbol, quantity: p.quantity, purchasePrice: p.purchasePrice })));
+          fetchPortfolioValue(u.id);
           setPage('portfolio');
         } catch (err) {
           setError(err.message);
@@ -108,6 +124,18 @@ export default function App() {
   if (page === 'portfolio') return (
     <div>
       <h2>Portfolio Builder</h2>
+      {valueLoading && <p><em>Calculating portfolio value...</em></p>}
+      {valueData && !valueLoading && (
+        <div style={{border:'1px solid #ccc', padding:'10px', marginBottom:'10px'}}>
+          <strong>Total Portfolio Value: ${valueData.totalValue.toFixed(2)}</strong>
+          {valueData.warnings && valueData.warnings.length > 0 && (
+            <p style={{color:'orange', fontSize:'0.9em'}}>Some holdings could not be priced and were excluded from the total.</p>
+          )}
+        </div>
+      )}
+      {!valueLoading && !valueData && userId && portfolio.length > 0 && (
+        <p style={{color:'gray'}}>Current portfolio value is unavailable right now.</p>
+      )}
       <input placeholder="Search stock (e.g. AAPL)" value={query} onChange={e => setQuery(e.target.value)} />
       <button onClick={searchStocks}>Search</button>
       {searchResults.length > 0 && (
