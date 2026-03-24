@@ -9,6 +9,8 @@ export default function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const set = (key, val) => setForm({ ...form, [key]: val });
 
@@ -76,18 +78,29 @@ export default function App() {
       <select onChange={async (e) => {
         const id = e.target.value;
         if (!id) return;
-        const res = await fetch('/users/' + id);
-        const u = await res.json();
-        setUserId(u.id);
-        setForm({ name: u.name, age: u.age, sex: u.sex, employmentStatus: u.employmentStatus, incomeRange: u.incomeRange, depositAmount: u.depositAmount });
-        const pRes = await fetch('/users/' + id + '/portfolio');
-        const pItems = await pRes.json();
-        setPortfolio(pItems.map(p => ({ symbol: p.symbol, name: p.symbol, quantity: p.quantity, purchasePrice: p.purchasePrice })));
-        setPage('portfolio');
+        setLoading(true);
+        setError(null);
+        try {
+          const res = await fetch('/users/' + id);
+          if (!res.ok) throw new Error('User not found');
+          const u = await res.json();
+          setUserId(u.id);
+          setForm({ name: u.name, age: u.age, sex: u.sex, employmentStatus: u.employmentStatus, incomeRange: u.incomeRange, depositAmount: u.depositAmount });
+          const pRes = await fetch('/users/' + id + '/portfolio');
+          const pItems = pRes.ok ? await pRes.json() : [];
+          setPortfolio(pItems.map(p => ({ symbol: p.symbol, name: p.symbol, quantity: p.quantity, purchasePrice: p.purchasePrice })));
+          setPage('portfolio');
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
       }} defaultValue="">
         <option value="">-- Select --</option>
         {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
       </select>
+      {loading && <p>Loading...</p>}
+      {error && <p style={{color:'red'}}>{error}</p>}
       <br/><button onClick={() => setPage('landing')}>Back</button>
     </div>
   );
@@ -105,11 +118,25 @@ export default function App() {
         </ul>
       )}
       <h3>My Portfolio</h3>
-      <ul>
-        {portfolio.map((s, i) => (
-          <li key={i}>{s.symbol} - {s.name} <button onClick={() => setPortfolio(portfolio.filter((_, j) => j !== i))}>Remove</button></li>
-        ))}
-      </ul>
+      {portfolio.length === 0 ? (
+        <p>No holdings yet. Search for a stock above to get started.</p>
+      ) : (
+        <table border="1" cellPadding="6" cellSpacing="0">
+          <thead>
+            <tr><th>Symbol</th><th>Quantity</th><th>Purchase Price</th><th></th></tr>
+          </thead>
+          <tbody>
+            {portfolio.map((s, i) => (
+              <tr key={i}>
+                <td>{s.symbol}</td>
+                <td>{s.quantity}</td>
+                <td>${s.purchasePrice.toFixed(2)}</td>
+                <td><button onClick={() => setPortfolio(portfolio.filter((_, j) => j !== i))}>Remove</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       <button onClick={async () => {
         const url = userId ? '/users/' + userId : '/users';
         const method = userId ? 'PUT' : 'POST';
