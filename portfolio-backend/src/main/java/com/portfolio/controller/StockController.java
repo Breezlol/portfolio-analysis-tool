@@ -19,4 +19,10 @@ public class StockController {
     public ResponseEntity<String> search(@RequestParam String q) {
         return ResponseEntity.ok(alphaVantageService.searchStocks(q));
     }
+
+    @GetMapping("/quote")
+    public ResponseEntity<Double> quote(@RequestParam String symbol) {
+        Double price = alphaVantageService.getLatestPrice(symbol);
+        return ResponseEntity.ok(price != null ? price : 0.0);
+    }
 }
