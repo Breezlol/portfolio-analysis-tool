@@ -26,7 +26,7 @@ export default function App() {
 
   const addStock = (symbol, name) => {
     if (!portfolio.find(s => s.symbol === symbol)) {
-      setPortfolio([...portfolio, { symbol, name, quantity: 1 }]);
+      setPortfolio([...portfolio, { symbol, name, quantity: 1, purchasePrice: 0 }]);
     }
     setSearchResults([]);
     setQuery('');
@@ -80,6 +80,9 @@ export default function App() {
         const u = await res.json();
         setUserId(u.id);
         setForm({ name: u.name, age: u.age, sex: u.sex, employmentStatus: u.employmentStatus, incomeRange: u.incomeRange, depositAmount: u.depositAmount });
+        const pRes = await fetch('/users/' + id + '/portfolio');
+        const pItems = await pRes.json();
+        setPortfolio(pItems.map(p => ({ symbol: p.symbol, name: p.symbol, quantity: p.quantity, purchasePrice: p.purchasePrice })));
         setPage('portfolio');
       }} defaultValue="">
         <option value="">-- Select --</option>
@@ -115,7 +118,13 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...form, age: Number(form.age), depositAmount: Number(form.depositAmount) })
         });
-        if (!userId) { const u = await res.json(); setUserId(u.id); }
+        let uid = userId;
+        if (!userId) { const u = await res.json(); uid = u.id; setUserId(u.id); }
+        await fetch('/users/' + uid + '/portfolio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(portfolio.map(s => ({ symbol: s.symbol, quantity: s.quantity, purchasePrice: s.purchasePrice || 0 })))
+        });
         setSaved(true);
       }}>Save</button>
       {saved && <span> Saved!</span>}
