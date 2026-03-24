@@ -28,7 +28,7 @@ public class AlphaVantageService {
             // parse the price from the JSON response
             // format: "Global Quote": { "05. price": "123.45" }
             if (json != null && json.contains("05. price")) {
-                int start = json.indexOf("05. price") + 14;
+                int start = json.indexOf("05. price") + 13;
                 int end = json.indexOf("\"", start);
                 return Double.parseDouble(json.substring(start, end));
             }
