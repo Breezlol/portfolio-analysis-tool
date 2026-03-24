@@ -6,6 +6,8 @@ import com.portfolio.repository.PortfolioRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.portfolio.repository.UserRepository;
+
 import java.util.List;
 import java.util.Map;
 
@@ -14,13 +16,18 @@ import java.util.Map;
 public class PortfolioController {
 
     private final PortfolioRepository portfolioRepository;
+    private final UserRepository userRepository;
 
-    public PortfolioController(PortfolioRepository portfolioRepository) {
+    public PortfolioController(PortfolioRepository portfolioRepository, UserRepository userRepository) {
         this.portfolioRepository = portfolioRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/users/{userId}/portfolio")
     public ResponseEntity<?> getPortfolio(@PathVariable Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
         if (portfolioId == null) return ResponseEntity.ok(List.of());
 
