@@ -187,6 +187,7 @@ export default function App() {
           body: JSON.stringify(portfolio.map(s => ({ symbol: s.symbol, quantity: s.quantity, purchasePrice: s.purchasePrice || 0 })))
         });
         setSaved(true);
+        fetchPortfolioValue(uid);
       }}>Save</button>
       {saved && <span> Saved!</span>}
       <button onClick={() => setPage('landing')}>Back</button>
