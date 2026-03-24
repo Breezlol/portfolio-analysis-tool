@@ -7,7 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.portfolio.repository.UserRepository;
+import com.portfolio.service.AlphaVantageService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,10 +20,12 @@ public class PortfolioController {
 
     private final PortfolioRepository portfolioRepository;
     private final UserRepository userRepository;
+    private final AlphaVantageService alphaVantageService;
 
-    public PortfolioController(PortfolioRepository portfolioRepository, UserRepository userRepository) {
+    public PortfolioController(PortfolioRepository portfolioRepository, UserRepository userRepository, AlphaVantageService alphaVantageService) {
         this.portfolioRepository = portfolioRepository;
         this.userRepository = userRepository;
+        this.alphaVantageService = alphaVantageService;
     }
 
     @GetMapping("/users/{userId}/portfolio")
@@ -76,5 +81,45 @@ public class PortfolioController {
         }
 
         return ResponseEntity.ok(Map.of("status", "removed"));
+    }
+
+    @GetMapping("/users/{userId}/portfolio/value")
+    public ResponseEntity<?> getPortfolioValue(@PathVariable Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
+        if (portfolioId == null) return ResponseEntity.ok(Map.of("totalValue", 0, "holdings", List.of(), "warnings", List.of()));
+
+        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
+        AVLTree tree = new AVLTree();
+        for (PortfolioItem item : items) tree.insert(item);
+
+        List<Map<String, Object>> holdingValues = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        double totalValue = 0;
+
+        for (PortfolioItem item : tree.getItemsSorted()) {
+            Double price = alphaVantageService.getLatestPrice(item.getSymbol());
+            if (price != null) {
+                double value = price * item.getQuantity();
+                totalValue += value;
+                Map<String, Object> h = new HashMap<>();
+                h.put("symbol", item.getSymbol());
+                h.put("quantity", item.getQuantity());
+                h.put("purchasePrice", item.getPurchasePrice());
+                h.put("currentPrice", price);
+                h.put("marketValue", value);
+                holdingValues.add(h);
+            } else {
+                warnings.add(item.getSymbol() + ": price unavailable");
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalValue", totalValue);
+        result.put("holdings", holdingValues);
+        result.put("warnings", warnings);
+        return ResponseEntity.ok(result);
     }
 }
