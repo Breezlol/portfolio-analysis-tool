@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import './App.css';
 
 export default function App() {
@@ -27,6 +28,8 @@ export default function App() {
       setValueLoading(false);
     }
   };
+
+  const COLORS = ['#3a86ff', '#ff006e', '#fb5607', '#ffbe0b', '#8338ec', '#06d6a0', '#118ab2', '#ef476f'];
 
   const set = (key, val) => setForm({ ...form, [key]: val });
 
@@ -138,6 +141,23 @@ export default function App() {
       )}
       {!valueLoading && !valueData && userId && portfolio.length > 0 && (
         <p style={{color:'gray'}}>Current portfolio value is unavailable right now.</p>
+      )}
+      {valueData && !valueLoading && valueData.holdings && valueData.holdings.length > 0 && (
+        <div style={{textAlign:'center', margin:'16px 0'}}>
+          <h3>Allocation</h3>
+          <PieChart width={340} height={260} style={{margin:'0 auto'}}>
+            <Pie
+              data={valueData.holdings.map(h => ({ name: h.symbol, value: h.marketValue }))}
+              cx="50%" cy="50%" outerRadius={90}
+              dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
+            >
+              {valueData.holdings.map((_, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(val) => '$' + val.toFixed(2)} />
+          </PieChart>
+        </div>
       )}
       <input placeholder="Search stock (e.g. AAPL)" value={query} onChange={e => setQuery(e.target.value)} />
       <button onClick={searchStocks}>Search</button>

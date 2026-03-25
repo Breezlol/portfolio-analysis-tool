@@ -116,6 +116,14 @@ public class PortfolioController {
             }
         }
 
+        // compute allocation percentages
+        if (totalValue > 0) {
+            for (Map<String, Object> h : holdingValues) {
+                double mv = (double) h.get("marketValue");
+                h.put("allocationPercentage", Math.round(mv / totalValue * 1000.0) / 10.0);
+            }
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("totalValue", totalValue);
         result.put("holdings", holdingValues);
