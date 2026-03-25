@@ -152,7 +152,7 @@ export default function App() {
       {portfolio.length === 0 ? (
         <p>No holdings yet. Search for a stock above to get started.</p>
       ) : (
-        <table border="1" cellPadding="6" cellSpacing="0">
+        <table>
           <thead>
             <tr><th>Symbol</th><th>Quantity</th><th>Purchase Price</th><th></th></tr>
           </thead>
