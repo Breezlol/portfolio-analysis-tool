@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import './App.css';
 
 export default function App() {
   const [page, setPage] = useState('landing');
@@ -56,7 +57,7 @@ export default function App() {
   }, [page]);
 
   if (page === 'create') return (
-    <div>
+    <div className="app-container">
       <h2>Create New User</h2>
       <form onSubmit={handleCreate}>
         <input placeholder="Name" value={form.name} onChange={e => set('name', e.target.value)} required /><br/>
@@ -90,7 +91,7 @@ export default function App() {
   );
 
   if (page === 'load') return (
-    <div>
+    <div className="app-container">
       <h2>Select User</h2>
       <select onChange={async (e) => {
         const id = e.target.value;
@@ -124,11 +125,11 @@ export default function App() {
   );
 
   if (page === 'portfolio') return (
-    <div>
+    <div className="app-container">
       <h2>Portfolio Builder</h2>
       {valueLoading && <p><em>Calculating portfolio value...</em></p>}
       {valueData && !valueLoading && (
-        <div style={{border:'1px solid #ccc', padding:'10px', marginBottom:'10px'}}>
+        <div style={{background:'#f0f4ff', padding:'12px', marginBottom:'10px', borderRadius:'6px'}}>
           <strong>Total Portfolio Value: ${valueData.totalValue.toFixed(2)}</strong>
           {valueData.warnings && valueData.warnings.length > 0 && (
             <p style={{color:'orange', fontSize:'0.9em'}}>Some holdings could not be priced and were excluded from the total.</p>
@@ -195,7 +196,7 @@ export default function App() {
   );
 
   return (
-    <div>
+    <div className="app-container">
       <h1>Portfolio Analysis Tool</h1>
       <button onClick={() => setPage('create')}>Create New User</button>
       <button onClick={() => setPage('load')}>Load Existing User</button>
