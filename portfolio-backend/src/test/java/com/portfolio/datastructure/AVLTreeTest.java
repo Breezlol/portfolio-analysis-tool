@@ -32,7 +32,7 @@ class AVLTreeTest {
 
     @Test
     void worstCaseInsertOrderStillReturnsSorted() {
-        // Inserting already-sorted keys is the worst case for an unbalanced BST
+        // Inserting already sorted keys is the worst case for an unbalanced BST
         // (it degrades to a linked list). AVL must stay sorted and balanced.
         tree.insert(new PortfolioItem("AAPL", 1, 100.0));
         tree.insert(new PortfolioItem("GOOG", 1, 100.0));
