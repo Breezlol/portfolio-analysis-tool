@@ -103,6 +103,7 @@ public class AVLTree {
         inOrder(n.right, result);
     }
 
+    public int height() { return height(root); }
     public int size() { return size(root); }
     private int size(Node n) { return n == null ? 0 : 1 + size(n.left) + size(n.right); }
     public boolean isEmpty() { return root == null; }
