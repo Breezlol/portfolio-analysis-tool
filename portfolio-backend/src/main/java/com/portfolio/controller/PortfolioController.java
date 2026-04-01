@@ -116,18 +116,40 @@ public class PortfolioController {
             }
         }
 
-        // compute allocation percentages
+        // compute allocation percentages and find max
+        double maxAllocation = 0;
         if (totalValue > 0) {
             for (Map<String, Object> h : holdingValues) {
                 double mv = (double) h.get("marketValue");
-                h.put("allocationPercentage", Math.round(mv / totalValue * 1000.0) / 10.0);
+                double pct = Math.round(mv / totalValue * 1000.0) / 10.0;
+                h.put("allocationPercentage", pct);
+                if (pct > maxAllocation) maxAllocation = pct;
             }
+        }
+
+        // concentration analysis
+        String concentrationLabel;
+        String concentrationExplanation;
+        if (holdingValues.size() <= 1) {
+            concentrationLabel = "Highly concentrated";
+            concentrationExplanation = "Your entire portfolio is in a single stock.";
+        } else if (maxAllocation >= 60) {
+            concentrationLabel = "Highly concentrated";
+            concentrationExplanation = "A large share of your portfolio is invested in one stock.";
+        } else if (maxAllocation >= 40) {
+            concentrationLabel = "Somewhat concentrated";
+            concentrationExplanation = "A few holdings make up most of your portfolio.";
+        } else {
+            concentrationLabel = "Well diversified";
+            concentrationExplanation = "Your investments are spread across multiple holdings.";
         }
 
         Map<String, Object> result = new HashMap<>();
         result.put("totalValue", totalValue);
         result.put("holdings", holdingValues);
         result.put("warnings", warnings);
+        result.put("concentrationLabel", concentrationLabel);
+        result.put("concentrationExplanation", concentrationExplanation);
         return ResponseEntity.ok(result);
     }
 }
