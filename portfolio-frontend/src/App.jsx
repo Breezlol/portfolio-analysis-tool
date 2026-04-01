@@ -15,6 +15,8 @@ export default function App() {
   const [error, setError] = useState(null);
   const [valueData, setValueData] = useState(null);
   const [valueLoading, setValueLoading] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   const fetchPortfolioValue = async (uid) => {
     if (!uid) return;
@@ -26,6 +28,19 @@ export default function App() {
       setValueData(null);
     } finally {
       setValueLoading(false);
+    }
+    fetchAnalytics(uid);
+  };
+
+  const fetchAnalytics = async (uid) => {
+    setAnalyticsLoading(true);
+    try {
+      const res = await fetch('/users/' + uid + '/portfolio/analytics');
+      if (res.ok) setAnalytics(await res.json());
+    } catch (e) {
+      setAnalytics(null);
+    } finally {
+      setAnalyticsLoading(false);
     }
   };
 
@@ -49,7 +64,8 @@ export default function App() {
     if (portfolio.find(s => s.symbol === symbol)) return;
     // fetch the current price from the backend
     const res = await fetch('/stocks/quote?symbol=' + symbol);
-    const price = res.ok ? await res.json() : 0;
+    const price = res.ok ? await res.json() : null;
+    if (price == null) { alert('Could not fetch price for ' + symbol + '. Try again in a moment.'); return; }
     setPortfolio([...portfolio, { symbol, name, quantity: 1, purchasePrice: price }]);
     setSearchResults([]);
     setQuery('');
@@ -158,6 +174,29 @@ export default function App() {
             <Tooltip formatter={(val) => '$' + val.toFixed(2)} />
           </PieChart>
         </div>
+      )}
+      {valueData && !valueLoading && valueData.concentrationLabel && (
+        <div style={{background:'#f0f4ff', padding:'12px', marginBottom:'10px', borderRadius:'6px'}}>
+          <strong>Diversification: {valueData.concentrationLabel}</strong>
+          <p style={{margin:'4px 0 0', fontSize:'0.9em'}}>{valueData.concentrationExplanation}</p>
+        </div>
+      )}
+      {analyticsLoading && <p><em>Calculating risk analytics...</em></p>}
+      {analytics && !analyticsLoading && analytics.volatility != null && (
+        <div style={{background:'#f0f4ff', padding:'12px', marginBottom:'10px', borderRadius:'6px'}}>
+          <strong>Portfolio Volatility: {analytics.volatility}%</strong>
+          <p style={{margin:'4px 0 0', fontSize:'0.9em'}}>Volatility shows how much your portfolio tends to move up and down over time.</p>
+          <div style={{marginTop:'8px'}}>
+            <strong>Risk Level: {analytics.riskLabel}</strong>
+            <p style={{margin:'4px 0 0', fontSize:'0.9em'}}>{analytics.riskExplanation}</p>
+          </div>
+          {analytics.skippedSymbols && analytics.skippedSymbols.length > 0 && (
+            <p style={{color:'orange', fontSize:'0.85em', marginTop:'8px'}}>Some holdings could not be included because market data was unavailable.</p>
+          )}
+        </div>
+      )}
+      {analytics && !analyticsLoading && analytics.error && (
+        <p style={{color:'gray'}}>{analytics.error}</p>
       )}
       <input placeholder="Search stock (e.g. AAPL)" value={query} onChange={e => setQuery(e.target.value)} />
       <button onClick={searchStocks}>Search</button>
