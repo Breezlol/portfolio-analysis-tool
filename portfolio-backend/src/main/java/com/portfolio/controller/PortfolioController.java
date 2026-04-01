@@ -152,4 +152,41 @@ public class PortfolioController {
         result.put("concentrationExplanation", concentrationExplanation);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/users/{userId}/portfolio/analytics")
+    public ResponseEntity<?> getPortfolioAnalytics(@PathVariable Long userId) {
+        if (userRepository.findById(userId).isEmpty()) return ResponseEntity.notFound().build();
+        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
+        if (portfolioId == null) return ResponseEntity.ok(Map.of("error", "No portfolio found"));
+
+        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
+        AVLTree tree = new AVLTree();
+        for (PortfolioItem item : items) tree.insert(item);
+
+        List<String> analyzed = new ArrayList<>();
+        List<String> skipped = new ArrayList<>();
+        double totalValue = 0;
+
+        for (PortfolioItem item : tree.getItemsSorted()) {
+            Double price = alphaVantageService.getLatestPrice(item.getSymbol());
+            if (price != null) {
+                totalValue += price * item.getQuantity();
+                analyzed.add(item.getSymbol());
+            } else {
+                skipped.add(item.getSymbol());
+            }
+        }
+
+        if (analyzed.isEmpty()) {
+            return ResponseEntity.ok(Map.of(
+                "error", "Could not retrieve market data for any holdings.",
+                "skipped", skipped
+            ));
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("analyzedSymbols", analyzed);
+        result.put("skippedSymbols", skipped);
+        return ResponseEntity.ok(result);
+    }
 }
