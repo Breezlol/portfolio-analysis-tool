@@ -5,6 +5,8 @@ import com.portfolio.entity.PortfolioItem;
 import com.portfolio.repository.PortfolioRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,9 +14,11 @@ import java.util.Map;
 public class PortfolioService {
 
     private final PortfolioRepository portfolioRepository;
+    private final AlphaVantageService alphaVantageService;
 
-    public PortfolioService(PortfolioRepository portfolioRepository) {
+    public PortfolioService(PortfolioRepository portfolioRepository, AlphaVantageService alphaVantageService) {
         this.portfolioRepository = portfolioRepository;
+        this.alphaVantageService = alphaVantageService;
     }
 
     public List<PortfolioItem> getPortfolio(Long userId) {
@@ -24,6 +28,74 @@ public class PortfolioService {
         AVLTree tree = new AVLTree();
         for (PortfolioItem item : items) tree.insert(item);
         return tree.getItemsSorted();
+    }
+
+    public Map<String, Object> getPortfolioValue(Long userId) {
+        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
+        if (portfolioId == null) {
+            return Map.of("totalValue", 0, "holdings", List.of(), "warnings", List.of());
+        }
+        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
+        AVLTree tree = new AVLTree();
+        for (PortfolioItem item : items) tree.insert(item);
+
+        List<Map<String, Object>> holdingValues = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        double totalValue = 0;
+
+        for (PortfolioItem item : tree.getItemsSorted()) {
+            Double price = alphaVantageService.getLatestPrice(item.getSymbol());
+            if (price != null) {
+                double value = price * item.getQuantity();
+                totalValue += value;
+                Map<String, Object> h = new HashMap<>();
+                h.put("symbol", item.getSymbol());
+                h.put("quantity", item.getQuantity());
+                h.put("purchasePrice", item.getPurchasePrice());
+                h.put("currentPrice", price);
+                h.put("marketValue", value);
+                holdingValues.add(h);
+            } else {
+                warnings.add(item.getSymbol() + ": price unavailable");
+            }
+        }
+
+        if (totalValue > 0) {
+            for (Map<String, Object> h : holdingValues) {
+                double mv = (double) h.get("marketValue");
+                double pct = Math.round(mv / totalValue * 1000.0) / 10.0;
+                h.put("allocationPercentage", pct);
+            }
+        }
+
+        double maxAllocation = holdingValues.stream()
+                .filter(h -> h.containsKey("allocationPercentage"))
+                .mapToDouble(h -> (double) h.get("allocationPercentage"))
+                .max().orElse(0);
+
+        String concentrationLabel;
+        String concentrationExplanation;
+        if (holdingValues.size() <= 1) {
+            concentrationLabel = "Highly concentrated";
+            concentrationExplanation = "Your entire portfolio is in a single stock.";
+        } else if (maxAllocation >= 60) {
+            concentrationLabel = "Highly concentrated";
+            concentrationExplanation = "A large share of your portfolio is invested in one stock.";
+        } else if (maxAllocation >= 40) {
+            concentrationLabel = "Somewhat concentrated";
+            concentrationExplanation = "A few holdings make up most of your portfolio.";
+        } else {
+            concentrationLabel = "Well diversified";
+            concentrationExplanation = "Your investments are spread across multiple holdings.";
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalValue", totalValue);
+        result.put("holdings", holdingValues);
+        result.put("warnings", warnings);
+        result.put("concentrationLabel", concentrationLabel);
+        result.put("concentrationExplanation", concentrationExplanation);
+        return result;
     }
 
     public Map<String, Object> savePortfolio(Long userId, List<Map<String, Object>> items) {
