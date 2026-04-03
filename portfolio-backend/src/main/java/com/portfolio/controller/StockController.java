@@ -21,8 +21,9 @@ public class StockController {
     }
 
     @GetMapping("/quote")
-    public ResponseEntity<Double> quote(@RequestParam String symbol) {
+    public ResponseEntity<?> quote(@RequestParam String symbol) {
         Double price = alphaVantageService.getLatestPrice(symbol);
-        return ResponseEntity.ok(price != null ? price : 0.0);
+        if (price == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(price);
     }
 }
