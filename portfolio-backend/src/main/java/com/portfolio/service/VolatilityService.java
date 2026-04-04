@@ -10,8 +10,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Computes annualised volatility, Sharpe ratio, and 1-day 95% parametric VaR
+ * for a user's portfolio using historical daily close prices.
+ */
 @Service
 public class VolatilityService {
+
+    private static final double RISK_FREE_RATE = 0.04;
+    private static final double Z_95 = 1.645;
 
     private final PortfolioRepository portfolioRepository;
     private final AlphaVantageService alphaVantageService;
@@ -75,30 +82,4 @@ public class VolatilityService {
         for (double r : portfolioReturns) variance += (r - mean) * (r - mean);
         variance /= portfolioReturns.length;
 
-        double annualizedVolatility = Math.round(Math.sqrt(variance * 252) * 1000.0) / 10.0;
-
-        String riskLabel;
-        String riskExplanation;
-        if (annualizedVolatility < 10) {
-            riskLabel = "Low";
-            riskExplanation = "Your portfolio is relatively stable with small price movements.";
-        } else if (annualizedVolatility < 20) {
-            riskLabel = "Moderate";
-            riskExplanation = "Your portfolio may experience noticeable price swings, but not extreme ones.";
-        } else if (annualizedVolatility < 35) {
-            riskLabel = "High";
-            riskExplanation = "Your portfolio can experience significant price swings.";
-        } else {
-            riskLabel = "Very High";
-            riskExplanation = "Your portfolio is highly volatile and may see large daily changes.";
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("volatility", annualizedVolatility);
-        result.put("riskLabel", riskLabel);
-        result.put("riskExplanation", riskExplanation);
-        result.put("analyzedSymbols", analyzed);
-        result.put("skippedSymbols", skipped);
-        return result;
-    }
-}
+        double dailyVol = Math.sqrt(variance);
