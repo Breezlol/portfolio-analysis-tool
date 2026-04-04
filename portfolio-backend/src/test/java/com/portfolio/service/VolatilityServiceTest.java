@@ -30,3 +30,35 @@ class VolatilityServiceTest {
         when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
         when(portfolioRepository.findItemsByPortfolioId(10L))
                 .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0)));
+        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+
+        Map<String, Object> result = service.getAnalytics(1L);
+
+        assertFalse(result.containsKey("error"));
+        assertTrue((double) result.get("volatility") > 0);
+    }
+
+    @Test
+    void sharpeRatioPresentAndPositiveForRisingPortfolio() {
+        when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
+        when(portfolioRepository.findItemsByPortfolioId(10L))
+                .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0)));
+        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+
+        Map<String, Object> result = service.getAnalytics(1L);
+
+        assertTrue(result.containsKey("sharpeRatio"));
+        assertTrue((double) result.get("sharpeRatio") > 0);
+    }
+
+    @Test
+    void var95PresentAndPositive() {
+        when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
+        when(portfolioRepository.findItemsByPortfolioId(10L))
+                .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0)));
+        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+
+        Map<String, Object> result = service.getAnalytics(1L);
