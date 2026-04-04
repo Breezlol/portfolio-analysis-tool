@@ -4,6 +4,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
+/**
+ * User profile entity. Demographic fields (age, sex, employmentStatus, incomeRange)
+ * are stored for UI display purposes only and are not used in any financial calculations.
+ */
 public class User {
     private Long id;
 
