@@ -35,3 +35,16 @@ The project demonstrates object-oriented design, REST API development, data stru
 | MinHeap\<T\> | peekMin | O(1) |
 | Top-k selection | getTopMovers(k) | O(n log k) |
 
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /users/{id}/portfolio | All holdings, sorted |
+| POST | /users/{id}/portfolio | Save holdings |
+| DELETE | /users/{id}/portfolio/items/{symbol} | Remove holding |
+| GET | /users/{id}/portfolio/value | Market value + allocation |
+| GET | /users/{id}/portfolio/analytics | Volatility, Sharpe, VaR |
+| GET | /users/{id}/portfolio/items/{symbol} | Single holding (AVL find) |
+| GET | /users/{id}/portfolio/range?from=A&to=M | Range query |
+| GET | /users/{id}/portfolio/top-movers?k=5 | Top gainers & losers |
+
