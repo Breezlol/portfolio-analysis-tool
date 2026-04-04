@@ -66,4 +66,25 @@ public class PortfolioController {
         return ResponseEntity.ok(volatilityService.getAnalytics(userId));
     }
 
+    @GetMapping("/users/{userId}/portfolio/items/{symbol}")
+    public ResponseEntity<?> getItem(@PathVariable Long userId, @PathVariable String symbol) {
+        if (userRepository.findById(userId).isEmpty()) return ResponseEntity.notFound().build();
+        PortfolioItem item = portfolioService.findItem(userId, symbol);
+        return item != null ? ResponseEntity.ok(item) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/users/{userId}/portfolio/range")
+    public ResponseEntity<?> getPortfolioRange(@PathVariable Long userId,
+                                               @RequestParam String from,
+                                               @RequestParam String to) {
+        if (userRepository.findById(userId).isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(portfolioService.getPortfolioRange(userId, from, to));
+    }
+
+    @GetMapping("/users/{userId}/portfolio/top-movers")
+    public ResponseEntity<?> getTopMovers(@PathVariable Long userId,
+                                          @RequestParam(defaultValue = "5") int k) {
+        if (userRepository.findById(userId).isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(analyticsService.getTopMovers(userId, k));
+    }
 }
