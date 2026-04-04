@@ -62,3 +62,33 @@ class VolatilityServiceTest {
         when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
 
         Map<String, Object> result = service.getAnalytics(1L);
+
+        assertTrue(result.containsKey("var95"));
+        assertTrue((double) result.get("var95") > 0);
+    }
+
+    @Test
+    void returnsErrorWhenNoPortfolioFound() {
+        when(portfolioRepository.findPortfolioIdByUserId(99L)).thenReturn(null);
+        Map<String, Object> result = service.getAnalytics(99L);
+        assertTrue(result.containsKey("error"));
+    }
+
+    @Test
+    void skipsSymbolsWithNoMarketData() {
+        when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
+        when(portfolioRepository.findItemsByPortfolioId(10L))
+                .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0),
+                                    new PortfolioItem("XYZ", 5, 50.0)));
+        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+        when(alphaVantageService.getLatestPrice("XYZ")).thenReturn(null);
+
+        Map<String, Object> result = service.getAnalytics(1L);
+
+        assertFalse(result.containsKey("error"));
+        @SuppressWarnings("unchecked")
+        List<String> skipped = (List<String>) result.get("skippedSymbols");
+        assertTrue(skipped.contains("XYZ"));
+    }
+}
