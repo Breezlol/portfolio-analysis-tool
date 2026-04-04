@@ -21,3 +21,26 @@ import java.util.Map;
 @Service
 public class AnalyticsService {
 
+    private final PortfolioRepository portfolioRepository;
+    private final AlphaVantageService alphaVantageService;
+
+    public AnalyticsService(PortfolioRepository portfolioRepository,
+                            AlphaVantageService alphaVantageService) {
+        this.portfolioRepository = portfolioRepository;
+        this.alphaVantageService = alphaVantageService;
+    }
+
+    private record HoldingSnapshot(String symbol, double gainPercent) {}
+
+    public Map<String, Object> getTopMovers(Long userId, int k) {
+        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
+        if (portfolioId == null) return Map.of("error", "No portfolio found");
+
+        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
+        AVLTree tree = new AVLTree();
+        for (PortfolioItem item : items) tree.insert(item);
+
+        // gainers heap: min-heap by gainPercent — evict the smallest gain when full
+        MinHeap<HoldingSnapshot> gainers =
+                new MinHeap<>(Comparator.comparingDouble(HoldingSnapshot::gainPercent));
+        // losers heap: min-heap with reversed order — evict the least-negative when full
