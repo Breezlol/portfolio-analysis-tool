@@ -24,11 +24,16 @@ public class PortfolioController {
     private final UserRepository userRepository;
     private final PortfolioService portfolioService;
     private final VolatilityService volatilityService;
+    private final AnalyticsService analyticsService;
 
-    public PortfolioController(UserRepository userRepository, PortfolioService portfolioService, VolatilityService volatilityService) {
+    public PortfolioController(UserRepository userRepository,
+                               PortfolioService portfolioService,
+                               VolatilityService volatilityService,
+                               AnalyticsService analyticsService) {
         this.userRepository = userRepository;
         this.portfolioService = portfolioService;
         this.volatilityService = volatilityService;
+        this.analyticsService = analyticsService;
     }
 
     @GetMapping("/users/{userId}/portfolio")
@@ -60,4 +65,5 @@ public class PortfolioController {
         if (userRepository.findById(userId).isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(volatilityService.getAnalytics(userId));
     }
+
 }
