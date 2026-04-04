@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class AlphaVantageService {
 
+    private static final long CACHE_TTL_MS = 120_000;
+
     @Value("${alphavantage.api.key}")
     private String apiKey;
 
@@ -23,10 +25,10 @@ public class AlphaVantageService {
 
     private final Map<String, Double> priceCache = new ConcurrentHashMap<>();
     private final Map<String, List<Double>> historyCache = new ConcurrentHashMap<>();
-    private volatile long cacheTimestamp = 0;
+    private long cacheTimestamp = 0;
 
-    private void clearCacheIfStale() {
-        if (System.currentTimeMillis() - cacheTimestamp > 120_000) {
+    private synchronized void clearCacheIfStale() {
+        if (System.currentTimeMillis() - cacheTimestamp > CACHE_TTL_MS) {
             priceCache.clear();
             historyCache.clear();
             cacheTimestamp = System.currentTimeMillis();
