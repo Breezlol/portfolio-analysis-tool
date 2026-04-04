@@ -1,5 +1,9 @@
 package com.portfolio.entity;
 
+/**
+ * Immutable value object representing a single holding in a portfolio.
+ * The symbol is normalised to upper-case on construction.
+ */
 public class PortfolioItem {
     private String symbol;
     private int quantity;
