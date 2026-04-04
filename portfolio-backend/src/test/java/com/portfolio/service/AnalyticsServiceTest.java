@@ -66,3 +66,35 @@ class AnalyticsServiceTest {
                 new PortfolioItem("AAPL", 1, 100.0)
         ));
         when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(120.0);
+
+        Map<String, Object> result = service.getTopMovers(1L, 10);
+
+        @SuppressWarnings("unchecked")
+        List<?> gainers = (List<?>) result.get("topGainers");
+        assertEquals(1, gainers.size());
+    }
+
+    @Test
+    void returnsErrorWhenNoPortfolio() {
+        when(portfolioRepository.findPortfolioIdByUserId(99L)).thenReturn(null);
+        Map<String, Object> result = service.getTopMovers(99L, 5);
+        assertTrue(result.containsKey("error"));
+    }
+
+    @Test
+    void symbolWithMissingPriceIsSkipped() {
+        when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
+        when(portfolioRepository.findItemsByPortfolioId(10L)).thenReturn(List.of(
+                new PortfolioItem("AAPL", 1, 100.0),
+                new PortfolioItem("XYZ", 1, 50.0)
+        ));
+        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(120.0);
+        when(alphaVantageService.getLatestPrice("XYZ")).thenReturn(null);
+
+        Map<String, Object> result = service.getTopMovers(1L, 5);
+
+        @SuppressWarnings("unchecked")
+        List<String> skipped = (List<String>) result.get("skipped");
+        assertTrue(skipped.contains("XYZ"));
+    }
+}
