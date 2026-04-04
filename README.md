@@ -66,3 +66,18 @@ The project demonstrates object-oriented design, REST API development, data stru
 
 2. Update `portfolio-backend/src/main/resources/application.properties` with your MySQL credentials and Alpha Vantage API key.
 
+3. Start the backend:
+   ```
+   cd portfolio-backend
+   mvn spring-boot:run
+   ```
+
+4. Start the frontend:
+   ```
+   cd portfolio-frontend
+   npm install
+   npm run dev
+   ```
+
+5. Open http://localhost:5173
+
