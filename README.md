@@ -93,3 +93,24 @@ Tests cover:
 - `VolatilityServiceTest` — volatility calculation, Sharpe ratio, VaR, error handling
 - `AnalyticsServiceTest` — gainers/losers ranking, k > portfolio size, missing price skipping
 
+## Project Structure
+
+```
+portfolio-backend/
+  src/main/java/com/portfolio/
+    controller/       # REST endpoints
+    datastructure/    # AVLTree, MinHeap
+    entity/           # PortfolioItem, User
+    repository/       # PortfolioRepository, UserRepository
+    service/          # AlphaVantageService, AnalyticsService,
+                      # PortfolioService, VolatilityService
+  src/main/resources/
+    schema.sql        # Database table definitions
+    application.properties  # Config (gitignored)
+
+portfolio-frontend/
+  src/
+    App.jsx           # Main UI
+    main.jsx          # React entry point
+  vite.config.js      # Dev server + API proxy config
+```
