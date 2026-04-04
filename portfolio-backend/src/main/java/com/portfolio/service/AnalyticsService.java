@@ -67,3 +67,26 @@ public class AnalyticsService {
             }
         }
 
+        return Map.of(
+                "topGainers", drainSorted(gainers, Comparator.comparingDouble(HoldingSnapshot::gainPercent).reversed()),
+                "topLosers",  drainSorted(losers,  Comparator.comparingDouble(HoldingSnapshot::gainPercent)),
+                "skipped", skipped
+        );
+    }
+
+    /** Drains the heap into a list sorted by the given comparator. */
+    private List<Map<String, Object>> drainSorted(MinHeap<HoldingSnapshot> heap,
+                                                   Comparator<HoldingSnapshot> order) {
+        List<HoldingSnapshot> tmp = new ArrayList<>();
+        while (!heap.isEmpty()) tmp.add(heap.extractMin());
+        tmp.sort(order);
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (HoldingSnapshot s : tmp) {
+            out.add(Map.of(
+                    "symbol", s.symbol(),
+                    "gainPercent", Math.round(s.gainPercent() * 10.0) / 10.0
+            ));
+        }
+        return out;
+    }
+}
