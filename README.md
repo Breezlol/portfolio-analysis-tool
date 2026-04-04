@@ -48,3 +48,21 @@ The project demonstrates object-oriented design, REST API development, data stru
 | GET | /users/{id}/portfolio/range?from=A&to=M | Range query |
 | GET | /users/{id}/portfolio/top-movers?k=5 | Top gainers & losers |
 
+## Getting Started
+
+### Prerequisites
+
+- Java 17+
+- Maven
+- Node.js + npm
+- MySQL
+
+### Setup
+
+1. Create the MySQL database:
+   ```sql
+   CREATE DATABASE portfolio_db;
+   ```
+
+2. Update `portfolio-backend/src/main/resources/application.properties` with your MySQL credentials and Alpha Vantage API key.
+
