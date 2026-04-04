@@ -11,6 +11,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JDBC-backed repository for user accounts.
+ */
 @Repository
 public class UserRepository {
 
@@ -68,7 +71,9 @@ public class UserRepository {
             ps.setDouble(6, user.getDepositAmount());
             return ps;
         }, keyHolder);
-        user.setId(keyHolder.getKey().longValue());
+        Number key = keyHolder.getKey();
+        if (key == null) throw new IllegalStateException("Insert did not return a generated key");
+        user.setId(key.longValue());
         return user;
     }
 
