@@ -10,6 +10,11 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
+/**
+ * JDBC-backed repository for portfolios and their items.
+ * All write operations are non-transactional; callers must coordinate
+ * delete-then-insert sequences within the same request thread.
+ */
 @Repository
 public class PortfolioRepository {
 
@@ -38,7 +43,9 @@ public class PortfolioRepository {
             ps.setLong(1, userId);
             return ps;
         }, keyHolder);
-        return keyHolder.getKey().longValue();
+        Number key = keyHolder.getKey();
+        if (key == null) throw new IllegalStateException("Insert did not return a generated key");
+        return key.longValue();
     }
 
     public List<PortfolioItem> findItemsByPortfolioId(Long portfolioId) {
