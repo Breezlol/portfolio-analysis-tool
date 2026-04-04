@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Business logic for portfolio CRUD and value calculation.
+ * Uses an AVL tree as the in-memory working structure to keep items sorted
+ * and to support O(log n) single-item lookup and O(log n + k) range queries.
+ */
 @Service
 public class PortfolioService {
 
