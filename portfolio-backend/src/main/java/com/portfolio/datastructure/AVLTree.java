@@ -96,6 +96,22 @@ public class AVLTree {
         return null;
     }
 
+    /** Returns all items whose symbol falls in [fromSymbol, toSymbol] in sorted order. O(log n + k). */
+    public List<PortfolioItem> findRange(String fromSymbol, String toSymbol) {
+        List<PortfolioItem> result = new ArrayList<>();
+        findRange(root, fromSymbol, toSymbol, result);
+        return result;
+    }
+
+    private void findRange(Node n, String from, String to, List<PortfolioItem> result) {
+        if (n == null) return;
+        int cmpFrom = from.compareTo(n.item.getSymbol());
+        int cmpTo   = to.compareTo(n.item.getSymbol());
+        if (cmpFrom < 0) findRange(n.left, from, to, result);
+        if (cmpFrom <= 0 && cmpTo >= 0) result.add(n.item);
+        if (cmpTo > 0) findRange(n.right, from, to, result);
+    }
+
     public List<PortfolioItem> getItemsSorted() {
         List<PortfolioItem> result = new ArrayList<>();
         inOrder(root, result);
