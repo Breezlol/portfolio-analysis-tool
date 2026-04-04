@@ -1,6 +1,8 @@
 package com.portfolio.controller;
 
+import com.portfolio.entity.PortfolioItem;
 import com.portfolio.repository.UserRepository;
+import com.portfolio.service.AnalyticsService;
 import com.portfolio.service.PortfolioService;
 import com.portfolio.service.VolatilityService;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST controller for portfolio operations.
+ *
+ * <p>All endpoints are scoped under {@code /users/{userId}/portfolio}.
+ * Requests for non-existent users return HTTP 404 immediately.
+ */
 @RestController
 @CrossOrigin
 public class PortfolioController {
