@@ -4,6 +4,12 @@ import com.portfolio.entity.PortfolioItem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Self-balancing AVL tree keyed on {@link PortfolioItem#getSymbol()}.
+ *
+ * <p>Complexity: insert O(log n), remove O(log n), find O(log n),
+ * getItemsSorted O(n), findRange O(log n + k) where k is result size.
+ */
 public class AVLTree {
 
     private Node root;
