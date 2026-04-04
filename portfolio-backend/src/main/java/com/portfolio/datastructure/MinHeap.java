@@ -50,3 +50,28 @@ public class MinHeap<T> {
     private void siftUp(int i) {
         while (i > 0) {
             int parent = (i - 1) / 2;
+            if (compare(i, parent) < 0) { swap(i, parent); i = parent; }
+            else break;
+        }
+    }
+
+    private void siftDown(int i) {
+        while (true) {
+            int left = 2 * i + 1, right = 2 * i + 2, smallest = i;
+            if (left  < size && compare(left,  smallest) < 0) smallest = left;
+            if (right < size && compare(right, smallest) < 0) smallest = right;
+            if (smallest == i) break;
+            swap(i, smallest);
+            i = smallest;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private int compare(int a, int b) {
+        return comparator.compare((T) data[a], (T) data[b]);
+    }
+
+    private void swap(int a, int b) {
+        Object tmp = data[a]; data[a] = data[b]; data[b] = tmp;
+    }
+}
