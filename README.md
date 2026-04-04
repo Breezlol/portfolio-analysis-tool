@@ -81,3 +81,15 @@ The project demonstrates object-oriented design, REST API development, data stru
 
 5. Open http://localhost:5173
 
+### Running Tests
+
+```
+cd portfolio-backend
+mvn test
+```
+
+Tests cover:
+- `MinHeapTest` — insert/extract ordering, top-k algorithm, reversed comparator, edge cases
+- `VolatilityServiceTest` — volatility calculation, Sharpe ratio, VaR, error handling
+- `AnalyticsServiceTest` — gainers/losers ranking, k > portfolio size, missing price skipping
+
