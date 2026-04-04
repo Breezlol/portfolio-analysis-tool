@@ -46,3 +46,25 @@ class MinHeapTest {
         MinHeap<Integer> heap = new MinHeap<Integer>(Comparator.reverseOrder());
         heap.insert(3); heap.insert(8); heap.insert(1);
         assertEquals(8, heap.extractMin());
+    }
+
+    @Test
+    void extractMinOnEmptyHeapThrows() {
+        MinHeap<Integer> heap = new MinHeap<Integer>(Comparator.naturalOrder());
+        assertThrows(IllegalStateException.class, heap::extractMin);
+    }
+
+    @Test
+    void insertNullThrows() {
+        MinHeap<Integer> heap = new MinHeap<Integer>(Comparator.naturalOrder());
+        assertThrows(IllegalArgumentException.class, () -> heap.insert(null));
+    }
+
+    @Test
+    void heapGrowsBeyondDefaultCapacity() {
+        MinHeap<Integer> heap = new MinHeap<Integer>(Comparator.naturalOrder());
+        for (int i = 20; i >= 1; i--) heap.insert(i);
+        assertEquals(1, heap.extractMin());
+        assertEquals(19, heap.size());
+    }
+}
