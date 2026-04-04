@@ -44,3 +44,26 @@ public class AnalyticsService {
         MinHeap<HoldingSnapshot> gainers =
                 new MinHeap<>(Comparator.comparingDouble(HoldingSnapshot::gainPercent));
         // losers heap: min-heap with reversed order — evict the least-negative when full
+        MinHeap<HoldingSnapshot> losers =
+                new MinHeap<>(Comparator.comparingDouble(HoldingSnapshot::gainPercent).reversed());
+
+        List<String> skipped = new ArrayList<>();
+
+        for (PortfolioItem item : tree.getItemsSorted()) {
+            Double current = alphaVantageService.getLatestPrice(item.getSymbol());
+            if (current == null || item.getPurchasePrice() == 0) {
+                skipped.add(item.getSymbol());
+                continue;
+            }
+            double gain = (current - item.getPurchasePrice()) / item.getPurchasePrice() * 100.0;
+            HoldingSnapshot snap = new HoldingSnapshot(item.getSymbol(), gain);
+
+            if (gain >= 0) {
+                gainers.insert(snap);
+                if (gainers.size() > k) gainers.extractMin();
+            } else {
+                losers.insert(snap);
+                if (losers.size() > k) losers.extractMin();
+            }
+        }
+
