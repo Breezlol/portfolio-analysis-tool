@@ -137,4 +137,24 @@ public class PortfolioService {
         }
         return Map.of("status", "removed");
     }
+
+    /** O(log n) single-item lookup via AVL find. Returns null if the symbol is not held. */
+    public PortfolioItem findItem(Long userId, String symbol) {
+        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
+        if (portfolioId == null) return null;
+        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
+        AVLTree tree = new AVLTree();
+        for (PortfolioItem item : items) tree.insert(item);
+        return tree.find(symbol.toUpperCase());
+    }
+
+    /** Returns all holdings whose symbol falls alphabetically in [fromSymbol, toSymbol]. O(log n + k). */
+    public List<PortfolioItem> getPortfolioRange(Long userId, String fromSymbol, String toSymbol) {
+        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
+        if (portfolioId == null) return List.of();
+        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
+        AVLTree tree = new AVLTree();
+        for (PortfolioItem item : items) tree.insert(item);
+        return tree.findRange(fromSymbol.toUpperCase(), toSymbol.toUpperCase());
+    }
 }
