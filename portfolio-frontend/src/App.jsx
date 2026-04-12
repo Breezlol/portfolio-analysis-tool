@@ -143,9 +143,25 @@ export default function App() {
     </div>
   );
 
-  if (page === 'portfolio') return (
+  if (page === 'portfolio') {
+    const depositAmount = Number(form.depositAmount) || 0;
+    const totalCost = portfolio.reduce((sum, s) => sum + s.quantity * s.purchasePrice, 0);
+    const remaining = depositAmount - totalCost;
+    const overBudget = totalCost > depositAmount;
+
+  return (
     <div className="app-container">
       <h2>Portfolio Builder</h2>
+      <div style={{background: overBudget ? '#ffe0e0' : '#f0f4ff', padding:'10px', marginBottom:'10px', borderRadius:'6px', fontSize:'0.95em'}}>
+        <span>Deposit: <strong>${depositAmount.toFixed(2)}</strong></span>
+        {' · '}
+        <span>Invested: <strong>${totalCost.toFixed(2)}</strong></span>
+        {' · '}
+        <span style={{color: overBudget ? 'red' : 'green'}}>
+          Remaining: <strong>${remaining.toFixed(2)}</strong>
+        </span>
+        {overBudget && <span style={{color:'red', marginLeft:'10px'}}>⚠ Exceeds your deposit!</span>}
+      </div>
       {valueLoading && <p><em>Calculating portfolio value...</em></p>}
       {valueData && !valueLoading && (
         <div style={{background:'#f0f4ff', padding:'12px', marginBottom:'10px', borderRadius:'6px'}}>
@@ -231,7 +247,7 @@ export default function App() {
           </tbody>
         </table>
       )}
-      <button onClick={async () => {
+      <button disabled={overBudget} onClick={async () => {
         const url = userId ? '/users/' + userId : '/users';
         const method = userId ? 'PUT' : 'POST';
         const res = await fetch(url, {
@@ -241,11 +257,16 @@ export default function App() {
         });
         let uid = userId;
         if (!userId) { const u = await res.json(); uid = u.id; setUserId(u.id); }
-        await fetch('/users/' + uid + '/portfolio', {
+        const pRes = await fetch('/users/' + uid + '/portfolio', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(portfolio.map(s => ({ symbol: s.symbol, quantity: s.quantity, purchasePrice: s.purchasePrice || 0 })))
         });
+        if (!pRes.ok) {
+          const err = await pRes.json();
+          alert(err.error || 'Failed to save portfolio.');
+          return;
+        }
         setSaved(true);
         fetchPortfolioValue(uid);
       }}>Save</button>
@@ -253,6 +274,7 @@ export default function App() {
       <button onClick={() => setPage('landing')}>Back</button>
     </div>
   );
+  } // end portfolio page
 
   return (
     <div className="app-container">

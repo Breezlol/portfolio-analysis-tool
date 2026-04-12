@@ -44,7 +44,22 @@ public class PortfolioController {
 
     @PostMapping("/users/{userId}/portfolio")
     public ResponseEntity<?> savePortfolio(@PathVariable Long userId, @RequestBody List<Map<String, Object>> items) {
-        if (userRepository.findById(userId).isEmpty()) return ResponseEntity.notFound().build();
+        var userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        double totalCost = items.stream().mapToDouble(item -> {
+            int quantity = ((Number) item.get("quantity")).intValue();
+            double price = ((Number) item.get("purchasePrice")).doubleValue();
+            return quantity * price;
+        }).sum();
+
+        double deposit = userOpt.get().getDepositAmount();
+        if (totalCost > deposit) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", String.format("Total portfolio cost ($%.2f) exceeds your deposit amount ($%.2f).", totalCost, deposit)
+            ));
+        }
+
         return ResponseEntity.ok(portfolioService.savePortfolio(userId, items));
     }
 
