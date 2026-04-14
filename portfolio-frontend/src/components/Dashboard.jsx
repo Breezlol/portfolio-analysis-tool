@@ -1,3 +1,9 @@
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+
+const COLORS = ['#111', '#555', '#888', '#aaa', '#ccc', '#ddd', '#e8e8e8'];
+
+const fmt = (v) => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 export default function Dashboard({ valueData, valueLoading, userId, portfolioLength }) {
   if (valueLoading) return (
     <div className="mb-8">
@@ -14,8 +20,6 @@ export default function Dashboard({ valueData, valueLoading, userId, portfolioLe
     return null;
   }
 
-  const fmt = (v) => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
   return (
     <div className="mb-10">
       <div className="mb-6">
@@ -25,6 +29,49 @@ export default function Dashboard({ valueData, valueLoading, userId, portfolioLe
           <p className="text-xs text-gray-400 mt-1">Some holdings excluded — price unavailable</p>
         )}
       </div>
+
+      {valueData.holdings?.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-8 items-start">
+          <div className="w-48 h-48 shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={valueData.holdings.map(h => ({ name: h.symbol, value: h.marketValue }))}
+                  cx="50%" cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {valueData.holdings.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(val) => fmt(val)} contentStyle={{ fontSize: 12, border: '1px solid #e5e7eb', borderRadius: 8 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {valueData.holdings.map((h, i) => (
+              <div key={h.symbol} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+                  <span className="text-sm font-medium text-gray-900">{h.symbol}</span>
+                </div>
+                <span className="text-sm text-gray-500">{h.allocationPercentage}%</span>
+              </div>
+            ))}
+
+            {valueData.concentrationLabel && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <p className="text-xs font-medium text-gray-900">{valueData.concentrationLabel}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{valueData.concentrationExplanation}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
