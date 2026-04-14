@@ -16,6 +16,7 @@ export default function App() {
   const [valueLoading, setValueLoading] = useState(false);
   const [analytics, setAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [topMovers, setTopMovers] = useState(null);
 
   const set = (key, val) => setForm({ ...form, [key]: val });
 
@@ -43,6 +44,10 @@ export default function App() {
       setValueLoading(false);
     }
     fetchAnalytics(uid);
+    fetch('/users/' + uid + '/portfolio/top-movers?k=5')
+      .then(r => r.ok ? r.json() : null)
+      .then(setTopMovers)
+      .catch(() => setTopMovers(null));
   };
 
   useEffect(() => {
@@ -59,6 +64,7 @@ export default function App() {
       saved={saved} setSaved={setSaved}
       valueData={valueData} valueLoading={valueLoading}
       analytics={analytics} analyticsLoading={analyticsLoading}
+      topMovers={topMovers}
       fetchPortfolioValue={fetchPortfolioValue}
       setPage={setPage}
     />
