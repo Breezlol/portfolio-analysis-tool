@@ -28,16 +28,26 @@ export default function LoadUserPage({ users, setUserId, setForm, setPortfolio, 
   };
 
   return (
-    <div className="app-container">
-      <h2>Select User</h2>
-      <select onChange={handleSelect} defaultValue="">
-        <option value="">-- Select --</option>
-        {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-      </select>
-      {loading && <p>Loading...</p>}
-      {error && <p style={{color: 'red'}}>{error}</p>}
-      <br/>
-      <button onClick={() => setPage('landing')}>Back</button>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
+      <div className="w-full max-w-sm">
+        <button onClick={() => setPage('landing')} className="text-xs text-gray-400 hover:text-gray-600 mb-8">
+          ← Back
+        </button>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-1">Load profile</h2>
+        <p className="text-sm text-gray-400 mb-8">Select an existing user to view their portfolio.</p>
+
+        <select
+          onChange={handleSelect}
+          defaultValue=""
+          className="w-full text-sm text-gray-900 border border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-gray-400 bg-white"
+        >
+          <option value="">Select a user...</option>
+          {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+        </select>
+
+        {loading && <p className="text-sm text-gray-400 mt-4">Loading...</p>}
+        {error && <p className="text-sm text-red-500 mt-4">{error}</p>}
+      </div>
     </div>
   );
 }
