@@ -3,13 +3,21 @@ import { useState } from 'react';
 export default function StockSearch({ onAdd, existingSymbols }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   const search = async () => {
     if (!query.trim()) return;
-    const res = await fetch('/stocks/search?q=' + query.trim());
-    const data = await res.json();
-    setResults(data.bestMatches || []);
+    setSearching(true);
+    try {
+      const res = await fetch('/stocks/search?q=' + query.trim());
+      const data = await res.json();
+      setResults(data.bestMatches || []);
+    } finally {
+      setSearching(false);
+    }
   };
+
+  const handleKey = (e) => { if (e.key === 'Enter') search(); };
 
   const handleAdd = async (symbol, name) => {
     if (existingSymbols.includes(symbol)) return;
@@ -22,19 +30,49 @@ export default function StockSearch({ onAdd, existingSymbols }) {
   };
 
   return (
-    <>
-      <input placeholder="Search stock (e.g. AAPL)" value={query} onChange={e => setQuery(e.target.value)} />
-      <button onClick={search}>Search</button>
+    <div className="mb-8">
+      <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Add holding</p>
+      <div className="flex gap-2 mb-3">
+        <input
+          className="flex-1 text-sm text-gray-900 border border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-gray-400"
+          placeholder="Search ticker or company name..."
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={handleKey}
+        />
+        <button
+          onClick={search}
+          disabled={searching}
+          className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40"
+        >
+          Search
+        </button>
+      </div>
+
       {results.length > 0 && (
-        <ul>
-          {results.map(r => (
-            <li key={r['1. symbol']}>
-              {r['1. symbol']} - {r['2. name']}
-              <button onClick={() => handleAdd(r['1. symbol'], r['2. name'])}>Add</button>
-            </li>
-          ))}
-        </ul>
+        <div className="border border-gray-100 rounded-lg overflow-hidden">
+          {results.map((r, i) => {
+            const symbol = r['1. symbol'];
+            const name = r['2. name'];
+            const already = existingSymbols.includes(symbol);
+            return (
+              <div key={symbol} className={`flex items-center justify-between px-4 py-3 ${i !== results.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                <div>
+                  <span className="text-sm font-medium text-gray-900">{symbol}</span>
+                  <span className="text-xs text-gray-400 ml-2">{name}</span>
+                </div>
+                <button
+                  onClick={() => handleAdd(symbol, name)}
+                  disabled={already}
+                  className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30"
+                >
+                  {already ? 'Added' : 'Add'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
       )}
-    </>
+    </div>
   );
 }
