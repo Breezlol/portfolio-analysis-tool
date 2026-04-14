@@ -1,10 +1,11 @@
 import BudgetBar from '../components/BudgetBar';
 import Dashboard from '../components/Dashboard';
 import RiskCard from '../components/RiskCard';
+import TopMovers from '../components/TopMovers';
 import StockSearch from '../components/StockSearch';
 import PortfolioTable from '../components/PortfolioTable';
 
-export default function PortfolioPage({ userId, setUserId, form, portfolio, setPortfolio, saved, setSaved, valueData, valueLoading, analytics, analyticsLoading, fetchPortfolioValue, setPage }) {
+export default function PortfolioPage({ userId, setUserId, form, portfolio, setPortfolio, saved, setSaved, valueData, valueLoading, analytics, analyticsLoading, topMovers, fetchPortfolioValue, setPage }) {
   const depositAmount = Number(form.depositAmount) || 0;
   const totalCost = portfolio.reduce((sum, s) => sum + s.quantity * s.purchasePrice, 0);
   const overBudget = totalCost > depositAmount;
@@ -29,27 +30,63 @@ export default function PortfolioPage({ userId, setUserId, form, portfolio, setP
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(portfolio.map(s => ({ symbol: s.symbol, quantity: s.quantity, purchasePrice: s.purchasePrice || 0 })))
     });
-    if (!pRes.ok) {
-      const err = await pRes.json();
-      alert(err.error || 'Failed to save portfolio.');
-      return;
-    }
+    if (!pRes.ok) { const err = await pRes.json(); alert(err.error || 'Failed to save portfolio.'); return; }
     setSaved(true);
     fetchPortfolioValue(uid);
   };
 
   return (
-    <div className="app-container">
-      <h2>Portfolio Builder</h2>
-      <BudgetBar depositAmount={depositAmount} totalCost={totalCost} />
-      <Dashboard valueData={valueData} valueLoading={valueLoading} userId={userId} portfolioLength={portfolio.length} />
-      <RiskCard analytics={analytics} analyticsLoading={analyticsLoading} />
-      <StockSearch onAdd={handleAdd} existingSymbols={portfolio.map(s => s.symbol)} />
-      <h3>My Portfolio</h3>
-      <PortfolioTable portfolio={portfolio} setPortfolio={setPortfolio} />
-      <button disabled={overBudget} onClick={handleSave}>Save</button>
-      {saved && <span> Saved!</span>}
-      <button onClick={() => setPage('landing')}>Back</button>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-2xl mx-auto px-6 py-12">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-12">
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Portfolio</p>
+            <h1 className="text-2xl font-semibold text-gray-900">{form.name}</h1>
+          </div>
+          <button
+            onClick={() => setPage('landing')}
+            className="text-xs text-gray-400 hover:text-gray-600"
+          >
+            ← Exit
+          </button>
+        </div>
+
+        {/* Budget summary */}
+        <BudgetBar depositAmount={depositAmount} totalCost={totalCost} />
+
+        {/* Portfolio value + allocation */}
+        <Dashboard valueData={valueData} valueLoading={valueLoading} userId={userId} portfolioLength={portfolio.length} />
+
+        {/* Risk analytics */}
+        <RiskCard analytics={analytics} analyticsLoading={analyticsLoading} />
+
+        {/* Top movers — MinHeap top-k */}
+        <TopMovers topMovers={topMovers} />
+
+        {/* Divider */}
+        <div className="border-t border-gray-100 my-8" />
+
+        {/* Stock search */}
+        <StockSearch onAdd={handleAdd} existingSymbols={portfolio.map(s => s.symbol)} />
+
+        {/* Holdings list */}
+        <PortfolioTable portfolio={portfolio} setPortfolio={setPortfolio} />
+
+        {/* Actions */}
+        <div className="flex items-center gap-4 pt-2">
+          <button
+            disabled={overBudget}
+            onClick={handleSave}
+            className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-30"
+          >
+            Save & Analyse
+          </button>
+          {saved && <span className="text-xs text-gray-400">Saved</span>}
+        </div>
+
+      </div>
     </div>
   );
 }
