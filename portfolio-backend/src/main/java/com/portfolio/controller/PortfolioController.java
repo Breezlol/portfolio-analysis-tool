@@ -1,5 +1,6 @@
 package com.portfolio.controller;
 
+import com.portfolio.dto.PortfolioItemRequest;
 import com.portfolio.entity.PortfolioItem;
 import com.portfolio.repository.UserRepository;
 import com.portfolio.service.AnalyticsService;
@@ -11,12 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST controller for portfolio operations.
- *
- * <p>All endpoints are scoped under {@code /users/{userId}/portfolio}.
- * Requests for non-existent users return HTTP 404 immediately.
- */
 @RestController
 @CrossOrigin
 public class PortfolioController {
@@ -43,15 +38,13 @@ public class PortfolioController {
     }
 
     @PostMapping("/users/{userId}/portfolio")
-    public ResponseEntity<?> savePortfolio(@PathVariable Long userId, @RequestBody List<Map<String, Object>> items) {
+    public ResponseEntity<?> savePortfolio(@PathVariable Long userId, @RequestBody List<PortfolioItemRequest> items) {
         var userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
 
-        double totalCost = items.stream().mapToDouble(item -> {
-            int quantity = ((Number) item.get("quantity")).intValue();
-            double price = ((Number) item.get("purchasePrice")).doubleValue();
-            return quantity * price;
-        }).sum();
+        double totalCost = items.stream()
+                .mapToDouble(item -> item.quantity() * item.purchasePrice())
+                .sum();
 
         double deposit = userOpt.get().getDepositAmount();
         if (totalCost > deposit) {

@@ -39,7 +39,6 @@ export default function PortfolioPage({ userId, setUserId, form, portfolio, setP
     <div className="min-h-screen bg-white">
       <div className="max-w-2xl mx-auto px-6 py-12">
 
-        {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Portfolio</p>
@@ -53,28 +52,20 @@ export default function PortfolioPage({ userId, setUserId, form, portfolio, setP
           </button>
         </div>
 
-        {/* Budget summary */}
         <BudgetBar depositAmount={depositAmount} totalCost={totalCost} />
 
-        {/* Portfolio value + allocation */}
         <Dashboard valueData={valueData} valueLoading={valueLoading} userId={userId} portfolioLength={portfolio.length} />
 
-        {/* Risk analytics */}
         <RiskCard analytics={analytics} analyticsLoading={analyticsLoading} />
 
-        {/* Top movers — MinHeap top-k */}
         <TopMovers topMovers={topMovers} />
 
-        {/* Divider */}
         <div className="border-t border-gray-100 my-8" />
 
-        {/* Stock search */}
         <StockSearch onAdd={handleAdd} existingSymbols={portfolio.map(s => s.symbol)} />
 
-        {/* Holdings list */}
         <PortfolioTable portfolio={portfolio} setPortfolio={setPortfolio} />
 
-        {/* Actions */}
         <div className="flex items-center gap-4 pt-2">
           <button
             disabled={overBudget}

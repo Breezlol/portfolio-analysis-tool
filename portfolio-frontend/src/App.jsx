@@ -25,8 +25,6 @@ export default function App() {
     try {
       const res = await fetch('/users/' + uid + '/portfolio/analytics');
       if (res.ok) setAnalytics(await res.json());
-    } catch (e) {
-      setAnalytics(null);
     } finally {
       setAnalyticsLoading(false);
     }
@@ -38,16 +36,13 @@ export default function App() {
     try {
       const res = await fetch('/users/' + uid + '/portfolio/value');
       if (res.ok) setValueData(await res.json());
-    } catch (e) {
-      setValueData(null);
     } finally {
       setValueLoading(false);
     }
     fetchAnalytics(uid);
     fetch('/users/' + uid + '/portfolio/top-movers?k=5')
       .then(r => r.ok ? r.json() : null)
-      .then(setTopMovers)
-      .catch(() => setTopMovers(null));
+      .then(setTopMovers);
   };
 
   useEffect(() => {

@@ -11,13 +11,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Identifies top-k gainers and losers using two MinHeap instances.
- *
- * <p>Algorithm: O(n log k) — for each holding insert into a size-k heap,
- * evicting the weakest candidate when the heap exceeds k. Full sort would
- * be O(n log n); this approach is preferable when k &lt;&lt; n.
- */
 @Service
 public class AnalyticsService {
 
@@ -74,7 +67,6 @@ public class AnalyticsService {
         );
     }
 
-    /** Drains the heap into a list sorted by the given comparator. */
     private List<Map<String, Object>> drainSorted(MinHeap<HoldingSnapshot> heap,
                                                    Comparator<HoldingSnapshot> order) {
         List<HoldingSnapshot> tmp = new ArrayList<>();

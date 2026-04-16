@@ -10,10 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Computes annualised volatility, Sharpe ratio, and 1-day 95% parametric VaR
- * for a user's portfolio using historical daily close prices.
- */
 @Service
 public class VolatilityService {
 

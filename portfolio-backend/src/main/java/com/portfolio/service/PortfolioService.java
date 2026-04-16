@@ -1,6 +1,7 @@
 package com.portfolio.service;
 
 import com.portfolio.datastructure.AVLTree;
+import com.portfolio.dto.PortfolioItemRequest;
 import com.portfolio.entity.PortfolioItem;
 import com.portfolio.repository.PortfolioRepository;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,17 @@ public class PortfolioService {
         this.alphaVantageService = alphaVantageService;
     }
 
-    public List<PortfolioItem> getPortfolio(Long userId) {
-        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
-        if (portfolioId == null) return List.of();
+    private AVLTree loadTree(Long portfolioId) {
         List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
         AVLTree tree = new AVLTree();
         for (PortfolioItem item : items) tree.insert(item);
-        return tree.getItemsSorted();
+        return tree;
+    }
+
+    public List<PortfolioItem> getPortfolio(Long userId) {
+        Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
+        if (portfolioId == null) return List.of();
+        return loadTree(portfolioId).getItemsSorted();
     }
 
     public Map<String, Object> getPortfolioValue(Long userId) {
@@ -40,9 +45,7 @@ public class PortfolioService {
         if (portfolioId == null) {
             return Map.of("totalValue", 0, "holdings", List.of(), "warnings", List.of());
         }
-        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
-        AVLTree tree = new AVLTree();
-        for (PortfolioItem item : items) tree.insert(item);
+        AVLTree tree = loadTree(portfolioId);
 
         List<Map<String, Object>> holdingValues = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
@@ -68,8 +71,7 @@ public class PortfolioService {
         if (totalValue > 0) {
             for (Map<String, Object> h : holdingValues) {
                 double mv = (double) h.get("marketValue");
-                double pct = Math.round(mv / totalValue * 1000.0) / 10.0;
-                h.put("allocationPercentage", pct);
+                h.put("allocationPercentage", Math.round(mv / totalValue * 1000.0) / 10.0);
             }
         }
 
@@ -103,20 +105,13 @@ public class PortfolioService {
         return result;
     }
 
-    public Map<String, Object> savePortfolio(Long userId, List<Map<String, Object>> items) {
+    public Map<String, Object> savePortfolio(Long userId, List<PortfolioItemRequest> items) {
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
         if (portfolioId == null) portfolioId = portfolioRepository.createPortfolio(userId);
         portfolioRepository.deleteItemsByPortfolioId(portfolioId);
         AVLTree tree = new AVLTree();
-        for (Map<String, Object> raw : items) {
-            String symbol = (String) raw.get("symbol");
-            int quantity = raw.get("quantity") instanceof Integer
-                    ? (int) raw.get("quantity")
-                    : ((Number) raw.get("quantity")).intValue();
-            double price = raw.get("purchasePrice") instanceof Double
-                    ? (double) raw.get("purchasePrice")
-                    : ((Number) raw.get("purchasePrice")).doubleValue();
-            tree.insert(new PortfolioItem(symbol, quantity, price));
+        for (PortfolioItemRequest req : items) {
+            tree.insert(new PortfolioItem(req.symbol(), req.quantity(), req.purchasePrice()));
         }
         for (PortfolioItem item : tree.getItemsSorted()) {
             portfolioRepository.saveItem(portfolioId, item);
@@ -127,9 +122,7 @@ public class PortfolioService {
     public Map<String, Object> removeItem(Long userId, String symbol) {
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
         if (portfolioId == null) return Map.of("status", "no portfolio found");
-        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
-        AVLTree tree = new AVLTree();
-        for (PortfolioItem item : items) tree.insert(item);
+        AVLTree tree = loadTree(portfolioId);
         tree.remove(symbol.toUpperCase());
         portfolioRepository.deleteItemsByPortfolioId(portfolioId);
         for (PortfolioItem item : tree.getItemsSorted()) {
@@ -138,23 +131,15 @@ public class PortfolioService {
         return Map.of("status", "removed");
     }
 
-    /** O(log n) single-item lookup via AVL find. Returns null if the symbol is not held. */
     public PortfolioItem findItem(Long userId, String symbol) {
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
         if (portfolioId == null) return null;
-        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
-        AVLTree tree = new AVLTree();
-        for (PortfolioItem item : items) tree.insert(item);
-        return tree.find(symbol.toUpperCase());
+        return loadTree(portfolioId).find(symbol.toUpperCase());
     }
 
-    /** Returns all holdings whose symbol falls alphabetically in [fromSymbol, toSymbol]. O(log n + k). */
     public List<PortfolioItem> getPortfolioRange(Long userId, String fromSymbol, String toSymbol) {
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
         if (portfolioId == null) return List.of();
-        List<PortfolioItem> items = portfolioRepository.findItemsByPortfolioId(portfolioId);
-        AVLTree tree = new AVLTree();
-        for (PortfolioItem item : items) tree.insert(item);
-        return tree.findRange(fromSymbol.toUpperCase(), toSymbol.toUpperCase());
+        return loadTree(portfolioId).findRange(fromSymbol.toUpperCase(), toSymbol.toUpperCase());
     }
 }
