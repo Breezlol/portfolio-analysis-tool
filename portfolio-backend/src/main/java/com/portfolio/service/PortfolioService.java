@@ -137,9 +137,17 @@ public class PortfolioService {
         return loadTree(portfolioId).find(symbol.toUpperCase());
     }
 
-    public List<PortfolioItem> getPortfolioRange(Long userId, String fromSymbol, String toSymbol) {
+    public Map<String, Object> getPortfolioRange(Long userId, String fromSymbol, String toSymbol) {
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
-        if (portfolioId == null) return List.of();
-        return loadTree(portfolioId).findRange(fromSymbol.toUpperCase(), toSymbol.toUpperCase());
+        if (portfolioId == null) return Map.of("items", List.of(), "nodesVisited", 0, "totalNodes", 0);
+        AVLTree tree = loadTree(portfolioId);
+        AVLTree.RangeResult result = tree.findRange(fromSymbol.toUpperCase(), toSymbol.toUpperCase());
+        return Map.of(
+            "items", result.items(),
+            "nodesVisited", result.nodesVisited(),
+            "totalNodes", result.totalNodes(),
+            "from", fromSymbol.toUpperCase(),
+            "to", toSymbol.toUpperCase()
+        );
     }
 }

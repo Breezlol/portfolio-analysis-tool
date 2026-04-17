@@ -96,20 +96,24 @@ public class AVLTree {
         return null;
     }
 
-    /** Returns all items whose symbol falls in [fromSymbol, toSymbol] in sorted order. O(log n + k). */
-    public List<PortfolioItem> findRange(String fromSymbol, String toSymbol) {
+    public record RangeResult(List<PortfolioItem> items, int nodesVisited, int totalNodes) {}
+
+    /** Returns items in [fromSymbol, toSymbol] plus traversal stats. O(log n + k). */
+    public RangeResult findRange(String fromSymbol, String toSymbol) {
         List<PortfolioItem> result = new ArrayList<>();
-        findRange(root, fromSymbol, toSymbol, result);
-        return result;
+        int[] visited = {0};
+        findRange(root, fromSymbol, toSymbol, result, visited);
+        return new RangeResult(result, visited[0], size());
     }
 
-    private void findRange(Node n, String from, String to, List<PortfolioItem> result) {
+    private void findRange(Node n, String from, String to, List<PortfolioItem> result, int[] visited) {
         if (n == null) return;
+        visited[0]++;
         int cmpFrom = from.compareTo(n.item.getSymbol());
         int cmpTo   = to.compareTo(n.item.getSymbol());
-        if (cmpFrom < 0) findRange(n.left, from, to, result);
+        if (cmpFrom < 0) findRange(n.left, from, to, result, visited);
         if (cmpFrom <= 0 && cmpTo >= 0) result.add(n.item);
-        if (cmpTo > 0) findRange(n.right, from, to, result);
+        if (cmpTo > 0) findRange(n.right, from, to, result, visited);
     }
 
     public List<PortfolioItem> getItemsSorted() {
