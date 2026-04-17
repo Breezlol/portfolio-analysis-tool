@@ -54,7 +54,7 @@ export default function App() {
   if (page === 'portfolio') return (
     <PortfolioPage
       userId={userId} setUserId={setUserId}
-      form={form}
+      form={form} set={set}
       portfolio={portfolio} setPortfolio={setPortfolio}
       saved={saved} setSaved={setSaved}
       valueData={valueData} valueLoading={valueLoading}

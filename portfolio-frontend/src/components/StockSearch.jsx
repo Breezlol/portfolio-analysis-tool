@@ -1,9 +1,10 @@
 import { useState } from 'react';
 
-export default function StockSearch({ onAdd, existingSymbols }) {
+export default function StockSearch({ onSelect, existingSymbols }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [loadingSymbol, setLoadingSymbol] = useState(null);
 
   const search = async () => {
     if (!query.trim()) return;
@@ -19,18 +20,22 @@ export default function StockSearch({ onAdd, existingSymbols }) {
 
   const handleKey = (e) => { if (e.key === 'Enter') search(); };
 
-  const handleAdd = async (symbol, name) => {
-    if (existingSymbols.includes(symbol)) return;
-    const res = await fetch('/stocks/quote?symbol=' + symbol);
-    const price = res.ok ? await res.json() : null;
-    if (price == null) { alert('Could not fetch price for ' + symbol + '. Try again in a moment.'); return; }
-    onAdd({ symbol, name, quantity: 1, purchasePrice: price });
-    setResults([]);
-    setQuery('');
+  const handleSelect = async (symbol, name) => {
+    setLoadingSymbol(symbol);
+    try {
+      const res = await fetch('/stocks/quote?symbol=' + symbol);
+      const price = res.ok ? await res.json() : null;
+      if (price == null) { alert('Could not fetch price for ' + symbol + '. Try again in a moment.'); return; }
+      onSelect({ symbol, name, currentPrice: price });
+      setResults([]);
+      setQuery('');
+    } finally {
+      setLoadingSymbol(null);
+    }
   };
 
   return (
-    <div className="mb-8">
+    <div className="mb-6">
       <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Add holding</p>
       <div className="flex gap-2 mb-3">
         <input
@@ -55,6 +60,7 @@ export default function StockSearch({ onAdd, existingSymbols }) {
             const symbol = r['1. symbol'];
             const name = r['2. name'];
             const already = existingSymbols.includes(symbol);
+            const loading = loadingSymbol === symbol;
             return (
               <div key={symbol} className={`flex items-center justify-between px-4 py-3 ${i !== results.length - 1 ? 'border-b border-gray-100' : ''}`}>
                 <div>
@@ -62,11 +68,11 @@ export default function StockSearch({ onAdd, existingSymbols }) {
                   <span className="text-xs text-gray-400 ml-2">{name}</span>
                 </div>
                 <button
-                  onClick={() => handleAdd(symbol, name)}
-                  disabled={already}
-                  className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30"
+                  onClick={() => handleSelect(symbol, name)}
+                  disabled={loading}
+                  className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
                 >
-                  {already ? 'Added' : 'Add'}
+                  {loading ? '…' : already ? 'Buy more' : 'Add'}
                 </button>
               </div>
             );

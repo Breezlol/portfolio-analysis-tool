@@ -1,18 +1,33 @@
+import { useState } from 'react';
 import BudgetBar from '../components/BudgetBar';
 import Dashboard from '../components/Dashboard';
 import RiskCard from '../components/RiskCard';
 import TopMovers from '../components/TopMovers';
 import StockSearch from '../components/StockSearch';
 import PortfolioTable from '../components/PortfolioTable';
+import PurchasePanel from '../components/PurchasePanel';
 
-export default function PortfolioPage({ userId, setUserId, form, portfolio, setPortfolio, saved, setSaved, valueData, valueLoading, analytics, analyticsLoading, topMovers, fetchPortfolioValue, setPage }) {
+export default function PortfolioPage({ userId, setUserId, form, set, portfolio, setPortfolio, saved, setSaved, valueData, valueLoading, analytics, analyticsLoading, topMovers, fetchPortfolioValue, setPage }) {
   const depositAmount = Number(form.depositAmount) || 0;
   const totalCost = portfolio.reduce((sum, s) => sum + s.quantity * s.purchasePrice, 0);
   const overBudget = totalCost > depositAmount;
 
-  const handleAdd = (stock) => {
-    if (portfolio.find(s => s.symbol === stock.symbol)) return;
-    setPortfolio([...portfolio, stock]);
+  const [pendingStock, setPendingStock] = useState(null);
+
+  const handleSelect = (stock) => setPendingStock(stock);
+
+  const handleConfirmPurchase = (qty) => {
+    const existing = portfolio.find(s => s.symbol === pendingStock.symbol);
+    if (existing) {
+      const totalQty = existing.quantity + qty;
+      const avgPrice = (existing.quantity * existing.purchasePrice + qty * pendingStock.currentPrice) / totalQty;
+      setPortfolio(portfolio.map(s =>
+        s.symbol === pendingStock.symbol ? { ...s, quantity: totalQty, purchasePrice: avgPrice } : s
+      ));
+    } else {
+      setPortfolio([...portfolio, { symbol: pendingStock.symbol, name: pendingStock.name, quantity: qty, purchasePrice: pendingStock.currentPrice }]);
+    }
+    setPendingStock(null);
   };
 
   const handleSave = async () => {
@@ -52,21 +67,14 @@ export default function PortfolioPage({ userId, setUserId, form, portfolio, setP
           </button>
         </div>
 
-        <BudgetBar depositAmount={depositAmount} totalCost={totalCost} />
+        <BudgetBar depositAmount={depositAmount} totalCost={totalCost} onAddFunds={amount => set('depositAmount', depositAmount + amount)} />
 
-        <Dashboard valueData={valueData} valueLoading={valueLoading} userId={userId} portfolioLength={portfolio.length} />
+        <StockSearch onSelect={handleSelect} existingSymbols={portfolio.map(s => s.symbol)} />
+        <PurchasePanel stock={pendingStock} onConfirm={handleConfirmPurchase} onCancel={() => setPendingStock(null)} />
 
-        <RiskCard analytics={analytics} analyticsLoading={analyticsLoading} />
+        <PortfolioTable portfolio={portfolio} setPortfolio={setPortfolio} valueData={valueData} userId={userId} />
 
-        <TopMovers topMovers={topMovers} />
-
-        <div className="border-t border-gray-100 my-8" />
-
-        <StockSearch onAdd={handleAdd} existingSymbols={portfolio.map(s => s.symbol)} />
-
-        <PortfolioTable portfolio={portfolio} setPortfolio={setPortfolio} valueData={valueData} />
-
-        <div className="flex items-center gap-4 pt-2">
+        <div className="flex items-center gap-4 pt-2 mb-10">
           <button
             disabled={overBudget}
             onClick={handleSave}
@@ -85,6 +93,14 @@ export default function PortfolioPage({ userId, setUserId, form, portfolio, setP
           )}
           {saved && !valueLoading && <span className="text-xs text-gray-400">Saved</span>}
         </div>
+
+        <div className="border-t border-gray-100 my-8" />
+
+        <Dashboard valueData={valueData} valueLoading={valueLoading} userId={userId} portfolioLength={portfolio.length} />
+
+        <RiskCard analytics={analytics} analyticsLoading={analyticsLoading} />
+
+        <TopMovers topMovers={topMovers} />
 
       </div>
     </div>
