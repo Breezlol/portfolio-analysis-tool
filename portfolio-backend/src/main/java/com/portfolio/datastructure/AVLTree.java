@@ -7,8 +7,8 @@ import java.util.List;
 /**
  * Self-balancing AVL tree keyed on {@link PortfolioItem#getSymbol()}.
  *
- * <p>Complexity: insert O(log n), remove O(log n), find O(log n),
- * getItemsSorted O(n), findRange O(log n + k) where k is result size.
+ * <p>Complexity: insert O(log n), getItemsSorted O(n),
+ * findRange O(log n + k) where k is result size.
  */
 public class AVLTree {
 
@@ -68,34 +68,6 @@ public class AVLTree {
         return balance(n);
     }
 
-    public void remove(String symbol) { root = remove(root, symbol); }
-
-    private Node remove(Node n, String symbol) {
-        if (n == null) return null;
-        int cmp = symbol.compareTo(n.item.getSymbol());
-        if (cmp < 0) n.left = remove(n.left, symbol);
-        else if (cmp > 0) n.right = remove(n.right, symbol);
-        else {
-            if (n.left == null) return n.right;
-            if (n.right == null) return n.left;
-            Node min = n.right;
-            while (min.left != null) min = min.left;
-            n.item = min.item;
-            n.right = remove(n.right, min.item.getSymbol());
-        }
-        return balance(n);
-    }
-
-    public PortfolioItem find(String symbol) {
-        Node n = root;
-        while (n != null) {
-            int cmp = symbol.compareTo(n.item.getSymbol());
-            if (cmp == 0) return n.item;
-            n = cmp < 0 ? n.left : n.right;
-        }
-        return null;
-    }
-
     public record RangeResult(List<PortfolioItem> items, int nodesVisited, int totalNodes) {}
 
     /** Returns items in [fromSymbol, toSymbol] plus traversal stats. O(log n + k). */
@@ -132,5 +104,4 @@ public class AVLTree {
     public int height() { return height(root); }
     public int size() { return size(root); }
     private int size(Node n) { return n == null ? 0 : 1 + size(n.left) + size(n.right); }
-    public boolean isEmpty() { return root == null; }
 }

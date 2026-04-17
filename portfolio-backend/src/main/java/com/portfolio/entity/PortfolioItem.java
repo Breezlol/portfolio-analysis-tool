@@ -5,9 +5,9 @@ package com.portfolio.entity;
  * The symbol is normalised to upper-case on construction.
  */
 public class PortfolioItem {
-    private String symbol;
-    private int quantity;
-    private double purchasePrice;
+    private final String symbol;
+    private final int quantity;
+    private final double purchasePrice;
 
     public PortfolioItem(String symbol, int quantity, double purchasePrice) {
         if (symbol == null || symbol.trim().isEmpty())
@@ -25,14 +25,4 @@ public class PortfolioItem {
     public String getSymbol() { return symbol; }
     public int getQuantity() { return quantity; }
     public double getPurchasePrice() { return purchasePrice; }
-
-    public double getTotalCost() {
-        return purchasePrice * quantity;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("PortfolioItem[%s x%d @ $%.2f = $%.2f]",
-                symbol, quantity, purchasePrice, getTotalCost());
-    }
 }
