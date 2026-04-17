@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
-const COLORS = ['#111', '#555', '#888', '#aaa', '#ccc', '#ddd', '#e8e8e8'];
+const COLORS = ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4'];
 
 const fmt = (v) => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -38,10 +38,12 @@ export default function Dashboard({ valueData, valueLoading, userId, portfolioLe
                 <Pie
                   data={valueData.holdings.map(h => ({ name: h.symbol, value: h.marketValue }))}
                   cx="50%" cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
+                  innerRadius={0}
+                  outerRadius={90}
                   dataKey="value"
-                  strokeWidth={0}
+                  stroke="#fff"
+                  strokeWidth={2}
+                  isAnimationActive={false}
                 >
                   {valueData.holdings.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
