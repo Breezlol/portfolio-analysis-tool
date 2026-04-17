@@ -1,6 +1,3 @@
-# Application config with secrets
-application.properties
-
 # Maven
 target/
 
