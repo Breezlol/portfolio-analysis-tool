@@ -15,16 +15,14 @@ import java.util.Optional;
  * JDBC-backed repository for user accounts.
  */
 @Repository
-public class UserRepository {
-
-    private final JdbcTemplate jdbcTemplate;
+public class UserRepository extends BaseRepository {
 
     public UserRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        super(jdbcTemplate);
     }
 
     public List<User> findAll() {
-        return jdbcTemplate.query("SELECT * FROM users", (rs, rowNum) -> {
+        return jdbc.query("SELECT * FROM users", (rs, rowNum) -> {
             User user = new User();
             user.setId(rs.getLong("id"));
             user.setName(rs.getString("name"));
@@ -38,7 +36,7 @@ public class UserRepository {
     }
 
     public Optional<User> findById(Long id) {
-        List<User> results = jdbcTemplate.query(
+        List<User> results = jdbc.query(
                 "SELECT * FROM users WHERE id = ?",
                 (rs, rowNum) -> {
                     User user = new User();
@@ -58,7 +56,7 @@ public class UserRepository {
 
     public User save(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
+        jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
                     "INSERT INTO users (name, age, sex, employment_status, income_range, deposit_amount) VALUES (?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
@@ -71,14 +69,12 @@ public class UserRepository {
             ps.setDouble(6, user.getDepositAmount());
             return ps;
         }, keyHolder);
-        Number key = keyHolder.getKey();
-        if (key == null) throw new IllegalStateException("Insert did not return a generated key");
-        user.setId(key.longValue());
+        user.setId(extractKey(keyHolder));
         return user;
     }
 
     public User update(User user) {
-        jdbcTemplate.update(
+        jdbc.update(
                 "UPDATE users SET name=?, age=?, sex=?, employment_status=?, income_range=?, deposit_amount=? WHERE id=?",
                 user.getName(), user.getAge(), user.getSex(),
                 user.getEmploymentStatus(), user.getIncomeRange(),
