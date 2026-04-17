@@ -23,7 +23,7 @@ public class AnalyticsService {
         this.alphaVantageService = alphaVantageService;
     }
 
-    private record HoldingSnapshot(String symbol, double gainPercent) {}
+    private record HoldingSnapshot(String symbol, double gainPercent, double purchasePrice, double currentPrice) {}
 
     public Map<String, Object> getTopMovers(Long userId, int k) {
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
@@ -49,7 +49,7 @@ public class AnalyticsService {
                 continue;
             }
             double gain = (current - item.getPurchasePrice()) / item.getPurchasePrice() * 100.0;
-            HoldingSnapshot snap = new HoldingSnapshot(item.getSymbol(), gain);
+            HoldingSnapshot snap = new HoldingSnapshot(item.getSymbol(), gain, item.getPurchasePrice(), current);
 
             if (gain >= 0) {
                 gainers.insert(snap);
@@ -76,7 +76,9 @@ public class AnalyticsService {
         for (HoldingSnapshot s : tmp) {
             out.add(Map.of(
                     "symbol", s.symbol(),
-                    "gainPercent", Math.round(s.gainPercent() * 10.0) / 10.0
+                    "gainPercent", Math.round(s.gainPercent() * 10.0) / 10.0,
+                    "purchasePrice", Math.round(s.purchasePrice() * 100.0) / 100.0,
+                    "currentPrice", Math.round(s.currentPrice() * 100.0) / 100.0
             ));
         }
         return out;

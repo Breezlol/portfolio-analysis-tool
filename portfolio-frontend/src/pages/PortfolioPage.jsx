@@ -64,7 +64,7 @@ export default function PortfolioPage({ userId, setUserId, form, portfolio, setP
 
         <StockSearch onAdd={handleAdd} existingSymbols={portfolio.map(s => s.symbol)} />
 
-        <PortfolioTable portfolio={portfolio} setPortfolio={setPortfolio} />
+        <PortfolioTable portfolio={portfolio} setPortfolio={setPortfolio} valueData={valueData} />
 
         <div className="flex items-center gap-4 pt-2">
           <button
@@ -74,7 +74,16 @@ export default function PortfolioPage({ userId, setUserId, form, portfolio, setP
           >
             Save & Analyse
           </button>
-          {saved && <span className="text-xs text-gray-400">Saved</span>}
+          {saved && userId && (
+            <button
+              onClick={() => fetchPortfolioValue(userId)}
+              disabled={valueLoading}
+              className="px-5 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 disabled:opacity-40"
+            >
+              {valueLoading ? 'Refreshing…' : 'Refresh Prices'}
+            </button>
+          )}
+          {saved && !valueLoading && <span className="text-xs text-gray-400">Saved</span>}
         </div>
 
       </div>
