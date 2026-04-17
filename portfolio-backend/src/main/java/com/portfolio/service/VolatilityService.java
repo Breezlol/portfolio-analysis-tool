@@ -49,7 +49,7 @@ public class VolatilityService {
                 analyzed.add(item.getSymbol());
                 List<Double> returns = new ArrayList<>();
                 for (int i = 1; i < history.size(); i++) {
-                    returns.add((history.get(i - 1) - history.get(i)) / history.get(i));
+                    returns.add((history.get(i) - history.get(i - 1)) / history.get(i - 1));
                 }
                 allReturns.add(returns);
             } else {
