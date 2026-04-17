@@ -2,7 +2,10 @@ package com.portfolio.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -16,9 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AlphaVantageService {
 
     private static final long CACHE_TTL_MS = 120_000;
-
-    @Value("${alphavantage.api.key}")
-    private String apiKey;
+    private static final String CHART_BASE = "https://query1.finance.yahoo.com/v8/finance/chart/";
+    private static final String SEARCH_BASE = "https://query2.finance.yahoo.com/v1/finance/search";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -35,31 +37,48 @@ public class AlphaVantageService {
         }
     }
 
+    private HttpEntity<Void> headers() {
+        HttpHeaders h = new HttpHeaders();
+        h.set("User-Agent", "Mozilla/5.0");
+        h.set("Accept", "application/json");
+        return new HttpEntity<>(h);
+    }
+
     public String searchStocks(String query) {
-        String url = UriComponentsBuilder
-                .fromHttpUrl("https://www.alphavantage.co/query")
-                .queryParam("function", "SYMBOL_SEARCH")
-                .queryParam("keywords", query)
-                .queryParam("apikey", apiKey)
-                .toUriString();
-        return restTemplate.getForObject(url, String.class);
+        try {
+            String url = UriComponentsBuilder.fromHttpUrl(SEARCH_BASE)
+                    .queryParam("q", query)
+                    .queryParam("quotesCount", 10)
+                    .queryParam("newsCount", 0)
+                    .toUriString();
+            ResponseEntity<String> resp = restTemplate.exchange(url, HttpMethod.GET, headers(), String.class);
+            JsonNode quotes = objectMapper.readTree(resp.getBody()).path("quotes");
+            List<Map<String, String>> matches = new ArrayList<>();
+            for (JsonNode q : quotes) {
+                String type = q.path("quoteType").asText("");
+                if (!type.equals("EQUITY") && !type.equals("ETF")) continue;
+                matches.add(Map.of(
+                        "1. symbol", q.path("symbol").asText(),
+                        "2. name", q.path("shortname").asText(q.path("longname").asText())
+                ));
+            }
+            return objectMapper.writeValueAsString(Map.of("bestMatches", matches));
+        } catch (Exception e) {
+            return "{\"bestMatches\":[]}";
+        }
     }
 
     public Double getLatestPrice(String symbol) {
         clearCacheIfStale();
         if (priceCache.containsKey(symbol)) return priceCache.get(symbol);
         try {
-            String url = UriComponentsBuilder
-                    .fromHttpUrl("https://www.alphavantage.co/query")
-                    .queryParam("function", "GLOBAL_QUOTE")
-                    .queryParam("symbol", symbol)
-                    .queryParam("apikey", apiKey)
-                    .toUriString();
-            String json = restTemplate.getForObject(url, String.class);
-            if (json == null) return null;
-            JsonNode priceNode = objectMapper.readTree(json).path("Global Quote").path("05. price");
-            if (priceNode.isMissingNode() || priceNode.asText().isEmpty()) return null;
-            Double price = Double.parseDouble(priceNode.asText());
+            String url = CHART_BASE + symbol;
+            ResponseEntity<String> resp = restTemplate.exchange(url, HttpMethod.GET, headers(), String.class);
+            JsonNode meta = objectMapper.readTree(resp.getBody())
+                    .path("chart").path("result").path(0).path("meta");
+            if (meta.isMissingNode()) return null;
+            double price = meta.path("regularMarketPrice").asDouble(0);
+            if (price == 0) return null;
             priceCache.put(symbol, price);
             return price;
         } catch (Exception e) {
@@ -71,20 +90,19 @@ public class AlphaVantageService {
         clearCacheIfStale();
         if (historyCache.containsKey(symbol)) return historyCache.get(symbol);
         try {
-            String url = UriComponentsBuilder
-                    .fromHttpUrl("https://www.alphavantage.co/query")
-                    .queryParam("function", "TIME_SERIES_DAILY")
-                    .queryParam("symbol", symbol)
-                    .queryParam("outputsize", "compact")
-                    .queryParam("apikey", apiKey)
+            String url = UriComponentsBuilder.fromHttpUrl(CHART_BASE + symbol)
+                    .queryParam("interval", "1d")
+                    .queryParam("range", "6mo")
                     .toUriString();
-            String json = restTemplate.getForObject(url, String.class);
-            if (json == null) return null;
-            JsonNode timeSeries = objectMapper.readTree(json).path("Time Series (Daily)");
-            if (timeSeries.isMissingNode()) return null;
+            ResponseEntity<String> resp = restTemplate.exchange(url, HttpMethod.GET, headers(), String.class);
+            JsonNode closes = objectMapper.readTree(resp.getBody())
+                    .path("chart").path("result").path(0)
+                    .path("indicators").path("quote").path(0).path("close");
+            if (closes.isMissingNode() || !closes.isArray()) return null;
             List<Double> prices = new ArrayList<>();
-            timeSeries.fields().forEachRemaining(entry ->
-                    prices.add(entry.getValue().path("4. close").asDouble()));
+            for (JsonNode c : closes) {
+                if (!c.isNull()) prices.add(c.asDouble());
+            }
             if (prices.isEmpty()) return null;
             historyCache.put(symbol, prices);
             return prices;
