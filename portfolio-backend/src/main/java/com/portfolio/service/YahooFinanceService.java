@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class AlphaVantageService {
+public class YahooFinanceService {
 
     private static final long CACHE_TTL_MS = 120_000;
     private static final String CHART_BASE = "https://query1.finance.yahoo.com/v8/finance/chart/";

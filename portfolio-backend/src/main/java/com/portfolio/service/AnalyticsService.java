@@ -15,12 +15,12 @@ import java.util.Map;
 public class AnalyticsService {
 
     private final PortfolioRepository portfolioRepository;
-    private final AlphaVantageService alphaVantageService;
+    private final YahooFinanceService yahooFinanceService;
 
     public AnalyticsService(PortfolioRepository portfolioRepository,
-                            AlphaVantageService alphaVantageService) {
+                            YahooFinanceService yahooFinanceService) {
         this.portfolioRepository = portfolioRepository;
-        this.alphaVantageService = alphaVantageService;
+        this.yahooFinanceService = yahooFinanceService;
     }
 
     private record HoldingSnapshot(String symbol, double gainPercent, double purchasePrice, double currentPrice) {}
@@ -43,7 +43,7 @@ public class AnalyticsService {
         List<String> skipped = new ArrayList<>();
 
         for (PortfolioItem item : tree.getItemsSorted()) {
-            Double current = alphaVantageService.getLatestPrice(item.getSymbol());
+            Double current = yahooFinanceService.getLatestPrice(item.getSymbol());
             if (current == null || item.getPurchasePrice() == 0) {
                 skipped.add(item.getSymbol());
                 continue;

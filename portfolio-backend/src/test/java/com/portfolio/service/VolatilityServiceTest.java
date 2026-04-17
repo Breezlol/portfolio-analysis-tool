@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 class VolatilityServiceTest {
 
     @Mock PortfolioRepository portfolioRepository;
-    @Mock AlphaVantageService alphaVantageService;
+    @Mock YahooFinanceService yahooFinanceService;
     @InjectMocks VolatilityService service;
 
     private List<Double> risingPrices() {
@@ -30,8 +30,8 @@ class VolatilityServiceTest {
         when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
         when(portfolioRepository.findItemsByPortfolioId(10L))
                 .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0)));
-        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
-        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+        when(yahooFinanceService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(yahooFinanceService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
 
         Map<String, Object> result = service.getAnalytics(1L);
 
@@ -44,8 +44,8 @@ class VolatilityServiceTest {
         when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
         when(portfolioRepository.findItemsByPortfolioId(10L))
                 .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0)));
-        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
-        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+        when(yahooFinanceService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(yahooFinanceService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
 
         Map<String, Object> result = service.getAnalytics(1L);
 
@@ -58,8 +58,8 @@ class VolatilityServiceTest {
         when(portfolioRepository.findPortfolioIdByUserId(1L)).thenReturn(10L);
         when(portfolioRepository.findItemsByPortfolioId(10L))
                 .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0)));
-        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
-        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+        when(yahooFinanceService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(yahooFinanceService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
 
         Map<String, Object> result = service.getAnalytics(1L);
 
@@ -80,9 +80,9 @@ class VolatilityServiceTest {
         when(portfolioRepository.findItemsByPortfolioId(10L))
                 .thenReturn(List.of(new PortfolioItem("AAPL", 10, 100.0),
                                     new PortfolioItem("XYZ", 5, 50.0)));
-        when(alphaVantageService.getLatestPrice("AAPL")).thenReturn(110.0);
-        when(alphaVantageService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
-        when(alphaVantageService.getLatestPrice("XYZ")).thenReturn(null);
+        when(yahooFinanceService.getLatestPrice("AAPL")).thenReturn(110.0);
+        when(yahooFinanceService.getHistoricalPrices("AAPL")).thenReturn(risingPrices());
+        when(yahooFinanceService.getLatestPrice("XYZ")).thenReturn(null);
 
         Map<String, Object> result = service.getAnalytics(1L);
 
