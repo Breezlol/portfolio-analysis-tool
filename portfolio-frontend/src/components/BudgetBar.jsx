@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { fmt } from '../utils/format';
 
 export default function BudgetBar({ depositAmount, totalCost, onAddFunds }) {
   const [funds, setFunds] = useState('');
@@ -19,14 +20,14 @@ export default function BudgetBar({ depositAmount, totalCost, onAddFunds }) {
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Remaining</p>
           <p className={`text-4xl font-semibold ${overBudget ? 'text-red-500' : 'text-gray-900'}`}>
-            ${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {fmt(remaining)}
           </p>
         </div>
         <div className="text-right">
           <p className="text-xs text-gray-400 mb-1">Deposit</p>
-          <p className="text-sm font-medium text-gray-700">${depositAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+          <p className="text-sm font-medium text-gray-700">{fmt(depositAmount)}</p>
           <p className="text-xs text-gray-400 mt-1">Invested</p>
-          <p className="text-sm font-medium text-gray-700">${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+          <p className="text-sm font-medium text-gray-700">{fmt(totalCost)}</p>
         </div>
       </div>
 

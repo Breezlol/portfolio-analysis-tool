@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { fmt } from '../utils/format';
 
 const riskColor = {
   'Low': 'text-gray-400',
@@ -82,7 +83,7 @@ export default function RiskCard({ analytics, analyticsLoading }) {
               <p className="text-xs text-gray-400">1-day 95% VaR</p>
               <InfoToggle id="var" active={open === 'var'} onToggle={toggle} />
             </div>
-            <p className="text-2xl font-semibold text-gray-900">${analytics.var95.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <p className="text-2xl font-semibold text-gray-900">{fmt(analytics.var95)}</p>
             <p className="text-xs text-gray-400 mt-0.5">Max expected loss</p>
           </div>
         )}

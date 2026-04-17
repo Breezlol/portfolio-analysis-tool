@@ -1,6 +1,5 @@
 import { useState } from 'react';
-
-const fmt = (v) => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+import { fmt } from '../utils/format';
 
 export default function PurchasePanel({ stock, onConfirm, onCancel }) {
   const [qty, setQty] = useState(1);
