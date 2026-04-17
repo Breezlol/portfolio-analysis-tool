@@ -2,6 +2,7 @@ package com.portfolio.repository;
 
 import com.portfolio.entity.User;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -11,47 +12,32 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * JDBC-backed repository for user accounts.
- */
 @Repository
 public class UserRepository extends BaseRepository {
+
+    private static final RowMapper<User> USER_MAPPER = (rs, rowNum) -> {
+        User user = new User();
+        user.setId(rs.getLong("id"));
+        user.setName(rs.getString("name"));
+        user.setAge(rs.getInt("age"));
+        user.setSex(rs.getString("sex"));
+        user.setEmploymentStatus(rs.getString("employment_status"));
+        user.setIncomeRange(rs.getString("income_range"));
+        user.setDepositAmount(rs.getDouble("deposit_amount"));
+        return user;
+    };
 
     public UserRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate);
     }
 
     public List<User> findAll() {
-        return jdbc.query("SELECT * FROM users", (rs, rowNum) -> {
-            User user = new User();
-            user.setId(rs.getLong("id"));
-            user.setName(rs.getString("name"));
-            user.setAge(rs.getInt("age"));
-            user.setSex(rs.getString("sex"));
-            user.setEmploymentStatus(rs.getString("employment_status"));
-            user.setIncomeRange(rs.getString("income_range"));
-            user.setDepositAmount(rs.getDouble("deposit_amount"));
-            return user;
-        });
+        return jdbc.query("SELECT * FROM users", USER_MAPPER);
     }
 
     public Optional<User> findById(Long id) {
-        List<User> results = jdbc.query(
-                "SELECT * FROM users WHERE id = ?",
-                (rs, rowNum) -> {
-                    User user = new User();
-                    user.setId(rs.getLong("id"));
-                    user.setName(rs.getString("name"));
-                    user.setAge(rs.getInt("age"));
-                    user.setSex(rs.getString("sex"));
-                    user.setEmploymentStatus(rs.getString("employment_status"));
-                    user.setIncomeRange(rs.getString("income_range"));
-                    user.setDepositAmount(rs.getDouble("deposit_amount"));
-                    return user;
-                },
-                id
-        );
-        return results.stream().findFirst();
+        return jdbc.query("SELECT * FROM users WHERE id = ?", USER_MAPPER, id)
+                .stream().findFirst();
     }
 
     public User save(User user) {

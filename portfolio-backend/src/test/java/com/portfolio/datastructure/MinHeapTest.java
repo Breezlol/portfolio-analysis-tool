@@ -34,7 +34,6 @@ class MinHeapTest {
             heap.insert(v);
             if (heap.size() > k) heap.extractMin();
         }
-        // heap should contain the 3 largest: 6, 7, 9
         assertEquals(3, heap.size());
         assertEquals(6, heap.extractMin());
         assertEquals(7, heap.extractMin());

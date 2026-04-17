@@ -17,11 +17,11 @@ public class VolatilityService {
     private static final double Z_95 = 1.645;
 
     private final PortfolioRepository portfolioRepository;
-    private final AlphaVantageService alphaVantageService;
+    private final YahooFinanceService yahooFinanceService;
 
-    public VolatilityService(PortfolioRepository portfolioRepository, AlphaVantageService alphaVantageService) {
+    public VolatilityService(PortfolioRepository portfolioRepository, YahooFinanceService yahooFinanceService) {
         this.portfolioRepository = portfolioRepository;
-        this.alphaVantageService = alphaVantageService;
+        this.yahooFinanceService = yahooFinanceService;
     }
 
     public Map<String, Object> getAnalytics(Long userId) {
@@ -40,8 +40,8 @@ public class VolatilityService {
         List<Double> marketValues = new ArrayList<>();
 
         for (PortfolioItem item : tree.getItemsSorted()) {
-            Double price = alphaVantageService.getLatestPrice(item.getSymbol());
-            List<Double> history = alphaVantageService.getHistoricalPrices(item.getSymbol());
+            Double price = yahooFinanceService.getLatestPrice(item.getSymbol());
+            List<Double> history = yahooFinanceService.getHistoricalPrices(item.getSymbol());
             if (price != null && history != null && history.size() > 1) {
                 double mv = price * item.getQuantity();
                 marketValues.add(mv);
@@ -82,34 +82,32 @@ public class VolatilityService {
         double annualVol = dailyVol * Math.sqrt(252);
         double annualMeanReturn = mean * 252;
 
+        if (annualVol == 0) {
+            return Map.of("error", "Not enough price history to compute risk metrics.",
+                    "skipped", skipped, "analyzedSymbols", analyzed);
+        }
+
         double annualizedVolatility = Math.round(annualVol * 1000.0) / 10.0;
         double sharpeRatio = Math.round((annualMeanReturn - RISK_FREE_RATE) / annualVol * 100.0) / 100.0;
         double var95 = Math.round(totalValue * dailyVol * Z_95 * 100.0) / 100.0;
 
-        String riskLabel;
-        String riskExplanation;
-        if (annualizedVolatility < 10) {
-            riskLabel = "Low";
-            riskExplanation = "Your portfolio is relatively stable with small price movements.";
-        } else if (annualizedVolatility < 20) {
-            riskLabel = "Moderate";
-            riskExplanation = "Your portfolio may experience noticeable price swings, but not extreme ones.";
-        } else if (annualizedVolatility < 35) {
-            riskLabel = "High";
-            riskExplanation = "Your portfolio can experience significant price swings.";
-        } else {
-            riskLabel = "Very High";
-            riskExplanation = "Your portfolio is highly volatile and may see large daily changes.";
-        }
+        String[] risk = classifyRisk(annualizedVolatility);
 
         Map<String, Object> result = new HashMap<>();
         result.put("volatility", annualizedVolatility);
         result.put("sharpeRatio", sharpeRatio);
         result.put("var95", var95);
-        result.put("riskLabel", riskLabel);
-        result.put("riskExplanation", riskExplanation);
+        result.put("riskLabel", risk[0]);
+        result.put("riskExplanation", risk[1]);
         result.put("analyzedSymbols", analyzed);
         result.put("skippedSymbols", skipped);
         return result;
+    }
+
+    private String[] classifyRisk(double annualizedVolatility) {
+        if (annualizedVolatility < 10) return new String[]{"Low", "Your portfolio is relatively stable with small price movements."};
+        if (annualizedVolatility < 20) return new String[]{"Moderate", "Your portfolio may experience noticeable price swings, but not extreme ones."};
+        if (annualizedVolatility < 35) return new String[]{"High", "Your portfolio can experience significant price swings."};
+        return new String[]{"Very High", "Your portfolio is highly volatile and may see large daily changes."};
     }
 }
