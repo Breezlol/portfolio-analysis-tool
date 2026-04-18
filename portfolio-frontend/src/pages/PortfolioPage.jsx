@@ -82,7 +82,7 @@ export default function PortfolioPage({ userId, setUserId, form, set, portfolio,
           >
             Save & Analyse
           </button>
-          {saved && userId && (
+          {userId && (
             <button
               onClick={() => fetchPortfolioValue(userId)}
               disabled={valueLoading}
