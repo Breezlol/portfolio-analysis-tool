@@ -62,7 +62,18 @@ The project demonstrates object-oriented design, REST API development, data stru
    CREATE DATABASE portfolio_db;
    ```
 
-2. Update `portfolio-backend/src/main/resources/application.properties` with your MySQL credentials. No API key is required — Yahoo Finance is accessed via its public endpoints.
+2. Provide your MySQL credentials via environment variables (the backend reads `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`; defaults target `localhost:3306/portfolio_db` as `root` with no password). No API key is required — Yahoo Finance is accessed via its public endpoints.
+
+   On Windows (PowerShell):
+   ```
+   $env:DB_USERNAME="root"
+   $env:DB_PASSWORD="your_password"
+   ```
+   On macOS/Linux:
+   ```
+   export DB_USERNAME=root
+   export DB_PASSWORD=your_password
+   ```
 
 3. Start the backend:
    ```
@@ -104,7 +115,7 @@ portfolio-backend/
                       # PortfolioService, VolatilityService
   src/main/resources/
     schema.sql        # Database table definitions
-    application.properties  # Config (gitignored)
+    application.properties  # Config (credentials via env vars)
 
 portfolio-frontend/
   src/
