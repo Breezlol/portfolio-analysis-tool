@@ -49,6 +49,17 @@ export default function App() {
     if (page === 'load') fetch('/users').then(r => r.json()).then(setUsers);
   }, [page]);
 
+  const exitToLanding = () => {
+    setUserId(null);
+    setForm({ name: '', age: '', sex: '', employmentStatus: '', incomeRange: '', depositAmount: '' });
+    setPortfolio([]);
+    setSaved(false);
+    setValueData(null);
+    setAnalytics(null);
+    setTopMovers(null);
+    setPage('landing');
+  };
+
   if (page === 'create') return <CreateUserPage form={form} set={set} setPage={setPage} />;
   if (page === 'load') return <LoadUserPage users={users} setUserId={setUserId} setForm={setForm} setPortfolio={setPortfolio} fetchPortfolioValue={fetchPortfolioValue} setPage={setPage} />;
   if (page === 'portfolio') return (
@@ -62,6 +73,7 @@ export default function App() {
       topMovers={topMovers}
       fetchPortfolioValue={fetchPortfolioValue}
       setPage={setPage}
+      exitToLanding={exitToLanding}
     />
   );
 

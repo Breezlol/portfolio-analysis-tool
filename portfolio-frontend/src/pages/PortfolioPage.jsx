@@ -7,7 +7,7 @@ import StockSearch from '../components/StockSearch';
 import PortfolioTable from '../components/PortfolioTable';
 import PurchasePanel from '../components/PurchasePanel';
 
-export default function PortfolioPage({ userId, setUserId, form, set, portfolio, setPortfolio, saved, setSaved, valueData, valueLoading, analytics, analyticsLoading, topMovers, fetchPortfolioValue, setPage }) {
+export default function PortfolioPage({ userId, setUserId, form, set, portfolio, setPortfolio, saved, setSaved, valueData, valueLoading, analytics, analyticsLoading, topMovers, fetchPortfolioValue, setPage, exitToLanding }) {
   const depositAmount = Number(form.depositAmount) || 0;
   const totalCost = portfolio.reduce((sum, s) => sum + s.quantity * s.purchasePrice, 0);
   const overBudget = totalCost > depositAmount;
@@ -60,7 +60,7 @@ export default function PortfolioPage({ userId, setUserId, form, set, portfolio,
             <h1 className="text-2xl font-semibold text-gray-900">{form.name}</h1>
           </div>
           <button
-            onClick={() => setPage('landing')}
+            onClick={exitToLanding}
             className="text-xs text-gray-400 hover:text-gray-600"
           >
             ← Exit
