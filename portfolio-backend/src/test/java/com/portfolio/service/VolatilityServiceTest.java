@@ -22,7 +22,7 @@ class VolatilityServiceTest {
     @InjectMocks VolatilityService service;
 
     private List<Double> risingPrices() {
-        return List.of(110.0, 108.0, 105.0, 102.0, 100.0);
+        return List.of(100.0, 102.0, 105.0, 108.0, 110.0);
     }
 
     @Test
