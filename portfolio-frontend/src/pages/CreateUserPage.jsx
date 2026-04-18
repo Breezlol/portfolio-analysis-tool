@@ -10,11 +10,10 @@ export default function CreateUserPage({ form, set, setPage }) {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <button onClick={() => setPage('landing')} className="text-xs text-gray-400 mb-8 flex items-center gap-1">
-          ← Back
+        <button onClick={() => setPage('landing')} className="text-xs text-gray-600 border border-gray-200 rounded-md px-3 py-1.5 mb-8">
+          Back
         </button>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-1">Create profile</h2>
-        <p className="text-sm text-gray-400 mb-8">Your details help us contextualise your portfolio.</p>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-8">Create profile</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input className={inputClass} placeholder="Full name" value={form.name} onChange={e => set('name', e.target.value)} required />

@@ -30,11 +30,10 @@ export default function LoadUserPage({ users, setUserId, setForm, setPortfolio, 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <button onClick={() => setPage('landing')} className="text-xs text-gray-400 mb-8">
-          ← Back
+        <button onClick={() => setPage('landing')} className="text-xs text-gray-600 border border-gray-200 rounded-md px-3 py-1.5 mb-8">
+          Back
         </button>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-1">Load profile</h2>
-        <p className="text-sm text-gray-400 mb-8">Select an existing user to view their portfolio.</p>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-8">Load profile</h2>
 
         <select
           onChange={handleSelect}

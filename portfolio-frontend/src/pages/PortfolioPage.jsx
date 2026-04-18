@@ -61,9 +61,9 @@ export default function PortfolioPage({ userId, setUserId, form, set, portfolio,
           </div>
           <button
             onClick={exitToLanding}
-            className="text-xs text-gray-400"
+            className="text-xs text-gray-600 border border-gray-200 rounded-md px-3 py-1.5"
           >
-            ← Exit
+            Exit
           </button>
         </div>
 
