@@ -77,7 +77,12 @@ public class YahooFinanceService {
             JsonNode meta = objectMapper.readTree(resp.getBody())
                     .path("chart").path("result").path(0).path("meta");
             if (meta.isMissingNode()) return null;
-            double price = meta.path("regularMarketPrice").asDouble(0);
+            String state = meta.path("marketState").asText("REGULAR");
+            double price = switch (state) {
+                case "PRE" -> meta.path("preMarketPrice").asDouble(meta.path("regularMarketPrice").asDouble(0));
+                case "POST", "POSTPOST", "CLOSED" -> meta.path("postMarketPrice").asDouble(meta.path("regularMarketPrice").asDouble(0));
+                default -> meta.path("regularMarketPrice").asDouble(0);
+            };
             if (price == 0) return null;
             priceCache.put(symbol, price);
             return price;
