@@ -32,8 +32,6 @@ public class VolatilityService {
         AVLTree tree = new AVLTree();
         for (PortfolioItem item : items) tree.insert(item);
 
-        List<String> analyzed = new ArrayList<>();
-        List<String> skipped = new ArrayList<>();
         List<Double> weights = new ArrayList<>();
         List<List<Double>> allReturns = new ArrayList<>();
         double totalValue = 0;
@@ -46,23 +44,24 @@ public class VolatilityService {
                 double mv = price * item.getQuantity();
                 marketValues.add(mv);
                 totalValue += mv;
-                analyzed.add(item.getSymbol());
                 List<Double> returns = new ArrayList<>();
                 for (int i = 1; i < history.size(); i++) {
                     returns.add((history.get(i) - history.get(i - 1)) / history.get(i - 1));
                 }
                 allReturns.add(returns);
-            } else {
-                skipped.add(item.getSymbol());
             }
         }
 
-        if (analyzed.isEmpty()) {
-            return Map.of("error", "Could not retrieve market data for any holdings.", "skipped", skipped);
+        if (allReturns.isEmpty()) {
+            return Map.of("error", "Could not retrieve market data for any holdings.");
         }
 
         for (Double mv : marketValues) weights.add(mv / totalValue);
         int minLen = allReturns.stream().mapToInt(List::size).min().orElse(0);
+
+        if (minLen < 2) {
+            return Map.of("error", "Not enough price history to compute risk metrics.");
+        }
 
         double[] portfolioReturns = new double[minLen];
         for (int t = 0; t < minLen; t++) {
@@ -83,8 +82,7 @@ public class VolatilityService {
         double annualMeanReturn = mean * 252;
 
         if (annualVol == 0) {
-            return Map.of("error", "Not enough price history to compute risk metrics.",
-                    "skipped", skipped, "analyzedSymbols", analyzed);
+            return Map.of("error", "Not enough price history to compute risk metrics.");
         }
 
         double annualizedVolatility = Math.round(annualVol * 1000.0) / 10.0;
@@ -99,8 +97,6 @@ public class VolatilityService {
         result.put("var95", var95);
         result.put("riskLabel", risk[0]);
         result.put("riskExplanation", risk[1]);
-        result.put("analyzedSymbols", analyzed);
-        result.put("skippedSymbols", skipped);
         return result;
     }
 

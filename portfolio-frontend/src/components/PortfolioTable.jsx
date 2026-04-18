@@ -23,7 +23,8 @@ export default function PortfolioTable({ portfolio, setPortfolio, valueData, use
     setFiltering(true);
     try {
       const res = await fetch(`/users/${userId}/portfolio/range?from=${from.toUpperCase()}&to=${to.toUpperCase()}`);
-      if (res.ok) setRangeResult(await res.json());
+      if (!res.ok) throw new Error('Range filter failed: ' + res.status);
+      setRangeResult(await res.json());
     } finally {
       setFiltering(false);
     }

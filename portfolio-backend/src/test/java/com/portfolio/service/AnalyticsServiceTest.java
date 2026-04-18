@@ -94,7 +94,8 @@ class AnalyticsServiceTest {
         Map<String, Object> result = service.getTopMovers(1L, 5);
 
         @SuppressWarnings("unchecked")
-        List<String> skipped = (List<String>) result.get("skipped");
-        assertTrue(skipped.contains("XYZ"));
+        List<Map<String, Object>> gainers = (List<Map<String, Object>>) result.get("topGainers");
+        assertEquals(1, gainers.size());
+        assertEquals("AAPL", gainers.get(0).get("symbol"));
     }
 }

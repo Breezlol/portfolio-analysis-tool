@@ -87,8 +87,6 @@ class VolatilityServiceTest {
         Map<String, Object> result = service.getAnalytics(1L);
 
         assertFalse(result.containsKey("error"));
-        @SuppressWarnings("unchecked")
-        List<String> skipped = (List<String>) result.get("skippedSymbols");
-        assertTrue(skipped.contains("XYZ"));
+        assertTrue((double) result.get("volatility") > 0);
     }
 }

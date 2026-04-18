@@ -1,5 +1,6 @@
 package com.portfolio.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -58,13 +60,15 @@ public class YahooFinanceService {
                 String type = q.path("quoteType").asText("");
                 if (!type.equals("EQUITY") && !type.equals("ETF")) continue;
                 matches.add(Map.of(
-                        "1. symbol", q.path("symbol").asText(),
-                        "2. name", q.path("shortname").asText(q.path("longname").asText())
+                        "symbol", q.path("symbol").asText(),
+                        "name", q.path("shortname").asText(q.path("longname").asText())
                 ));
             }
             return objectMapper.writeValueAsString(Map.of("bestMatches", matches));
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             return "{\"bestMatches\":[]}";
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -86,8 +90,10 @@ public class YahooFinanceService {
             if (price == 0) return null;
             priceCache.put(symbol, price);
             return price;
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             return null;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -111,8 +117,10 @@ public class YahooFinanceService {
             if (prices.isEmpty()) return null;
             historyCache.put(symbol, prices);
             return prices;
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             return null;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

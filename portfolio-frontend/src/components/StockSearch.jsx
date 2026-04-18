@@ -11,8 +11,9 @@ export default function StockSearch({ onSelect, existingSymbols }) {
     setSearching(true);
     try {
       const res = await fetch('/stocks/search?q=' + query.trim());
+      if (!res.ok) throw new Error('Search failed: ' + res.status);
       const data = await res.json();
-      setResults(data.bestMatches || []);
+      setResults(data.bestMatches);
     } finally {
       setSearching(false);
     }
@@ -57,8 +58,8 @@ export default function StockSearch({ onSelect, existingSymbols }) {
       {results.length > 0 && (
         <div className="border border-gray-100 rounded-lg overflow-hidden">
           {results.map((r, i) => {
-            const symbol = r['1. symbol'];
-            const name = r['2. name'];
+            const symbol = r.symbol;
+            const name = r.name;
             const already = existingSymbols.includes(symbol);
             const loading = loadingSymbol === symbol;
             return (

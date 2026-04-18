@@ -40,14 +40,9 @@ public class AnalyticsService {
         MinHeap<HoldingSnapshot> losers =
                 new MinHeap<>(Comparator.comparingDouble(HoldingSnapshot::gainPercent).reversed());
 
-        List<String> skipped = new ArrayList<>();
-
         for (PortfolioItem item : tree.getItemsSorted()) {
             Double current = yahooFinanceService.getLatestPrice(item.getSymbol());
-            if (current == null || item.getPurchasePrice() == 0) {
-                skipped.add(item.getSymbol());
-                continue;
-            }
+            if (current == null || item.getPurchasePrice() == 0) continue;
             double gain = (current - item.getPurchasePrice()) / item.getPurchasePrice() * 100.0;
             HoldingSnapshot snap = new HoldingSnapshot(item.getSymbol(), gain, item.getPurchasePrice(), current);
 
@@ -62,8 +57,7 @@ public class AnalyticsService {
 
         return Map.of(
                 "topGainers", drainSorted(gainers, Comparator.comparingDouble(HoldingSnapshot::gainPercent).reversed()),
-                "topLosers",  drainSorted(losers,  Comparator.comparingDouble(HoldingSnapshot::gainPercent)),
-                "skipped", skipped
+                "topLosers",  drainSorted(losers,  Comparator.comparingDouble(HoldingSnapshot::gainPercent))
         );
     }
 

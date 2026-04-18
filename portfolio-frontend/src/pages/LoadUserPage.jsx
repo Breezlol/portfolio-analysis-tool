@@ -16,7 +16,8 @@ export default function LoadUserPage({ users, setUserId, setForm, setPortfolio, 
       setUserId(u.id);
       setForm({ name: u.name, age: u.age, sex: u.sex, employmentStatus: u.employmentStatus, incomeRange: u.incomeRange, depositAmount: u.depositAmount });
       const pRes = await fetch('/users/' + id + '/portfolio');
-      const pItems = pRes.ok ? await pRes.json() : [];
+      if (!pRes.ok) throw new Error('Failed to load portfolio');
+      const pItems = await pRes.json();
       setPortfolio(pItems.map(p => ({ symbol: p.symbol, name: p.symbol, quantity: p.quantity, purchasePrice: p.purchasePrice })));
       fetchPortfolioValue(u.id);
       setPage('portfolio');

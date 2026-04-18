@@ -50,20 +50,16 @@ public class PortfolioService {
     public Map<String, Object> getPortfolioValue(Long userId) {
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
         if (portfolioId == null) {
-            return Map.of("totalValue", 0, "holdings", List.of(), "warnings", List.of());
+            return Map.of("totalValue", 0, "holdings", List.of());
         }
 
         List<Map<String, Object>> holdings = new ArrayList<>();
         List<Double> marketValues = new ArrayList<>();
-        List<String> warnings = new ArrayList<>();
         double totalValue = 0;
 
         for (PortfolioItem item : loadTree(portfolioId).getItemsSorted()) {
             Double price = yahooFinanceService.getLatestPrice(item.getSymbol());
-            if (price == null) {
-                warnings.add(item.getSymbol() + ": price unavailable");
-                continue;
-            }
+            if (price == null) continue;
             double value = price * item.getQuantity();
             totalValue += value;
             marketValues.add(value);
@@ -90,7 +86,6 @@ public class PortfolioService {
         Map<String, Object> result = new HashMap<>();
         result.put("totalValue", totalValue);
         result.put("holdings", holdings);
-        result.put("warnings", warnings);
         result.put("concentrationLabel", concentration[0]);
         result.put("concentrationExplanation", concentration[1]);
         return result;

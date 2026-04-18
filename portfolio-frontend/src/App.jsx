@@ -24,7 +24,8 @@ export default function App() {
     setAnalyticsLoading(true);
     try {
       const res = await fetch('/users/' + uid + '/portfolio/analytics');
-      if (res.ok) setAnalytics(await res.json());
+      if (!res.ok) throw new Error('Analytics request failed: ' + res.status);
+      setAnalytics(await res.json());
     } finally {
       setAnalyticsLoading(false);
     }
@@ -35,13 +36,17 @@ export default function App() {
     setValueLoading(true);
     try {
       const res = await fetch('/users/' + uid + '/portfolio/value');
-      if (res.ok) setValueData(await res.json());
+      if (!res.ok) throw new Error('Portfolio value request failed: ' + res.status);
+      setValueData(await res.json());
     } finally {
       setValueLoading(false);
     }
     fetchAnalytics(uid);
     fetch('/users/' + uid + '/portfolio/top-movers?k=5')
-      .then(r => r.ok ? r.json() : null)
+      .then(r => {
+        if (!r.ok) throw new Error('Top movers request failed: ' + r.status);
+        return r.json();
+      })
       .then(setTopMovers);
   };
 
