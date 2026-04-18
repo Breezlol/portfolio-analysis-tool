@@ -76,7 +76,7 @@ public class VolatilityService {
         mean /= portfolioReturns.length;
         double variance = 0;
         for (double r : portfolioReturns) variance += (r - mean) * (r - mean);
-        variance /= portfolioReturns.length;
+        variance /= (portfolioReturns.length - 1);
 
         double dailyVol = Math.sqrt(variance);
         double annualVol = dailyVol * Math.sqrt(252);
