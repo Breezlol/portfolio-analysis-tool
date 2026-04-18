@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 @RestController
@@ -42,22 +41,8 @@ public class PortfolioController {
     }
 
     @PostMapping("/users/{userId}/portfolio")
-    public ResponseEntity<?> savePortfolio(@PathVariable Long userId, @RequestBody List<PortfolioItemRequest> items) {
-        var userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
-
-        double totalCost = items.stream()
-                .mapToDouble(item -> item.quantity() * item.purchasePrice())
-                .sum();
-
-        double deposit = userOpt.get().getDepositAmount();
-        if (totalCost > deposit) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", String.format("Total portfolio cost ($%.2f) exceeds your deposit amount ($%.2f).", totalCost, deposit)
-            ));
-        }
-
-        return ResponseEntity.ok(portfolioService.savePortfolio(userId, items));
+    public ResponseEntity<Object> savePortfolio(@PathVariable Long userId, @RequestBody List<PortfolioItemRequest> items) {
+        return withUser(userId, () -> portfolioService.savePortfolio(userId, items));
     }
 
     @GetMapping("/users/{userId}/portfolio/value")

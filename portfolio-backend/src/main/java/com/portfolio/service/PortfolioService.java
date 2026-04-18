@@ -3,7 +3,9 @@ package com.portfolio.service;
 import com.portfolio.datastructure.AVLTree;
 import com.portfolio.dto.PortfolioItemRequest;
 import com.portfolio.entity.PortfolioItem;
+import com.portfolio.entity.User;
 import com.portfolio.repository.PortfolioRepository;
+import com.portfolio.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +24,14 @@ public class PortfolioService {
 
     private final PortfolioRepository portfolioRepository;
     private final YahooFinanceService yahooFinanceService;
+    private final UserRepository userRepository;
 
-    public PortfolioService(PortfolioRepository portfolioRepository, YahooFinanceService yahooFinanceService) {
+    public PortfolioService(PortfolioRepository portfolioRepository,
+                            YahooFinanceService yahooFinanceService,
+                            UserRepository userRepository) {
         this.portfolioRepository = portfolioRepository;
         this.yahooFinanceService = yahooFinanceService;
+        this.userRepository = userRepository;
     }
 
     private AVLTree loadTree(Long portfolioId) {
@@ -99,6 +105,18 @@ public class PortfolioService {
 
     @Transactional
     public Map<String, Object> savePortfolio(Long userId, List<PortfolioItemRequest> items) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        double totalCost = items.stream()
+                .mapToDouble(item -> item.quantity() * item.purchasePrice())
+                .sum();
+        double deposit = user.getDepositAmount();
+        if (totalCost > deposit) {
+            throw new BudgetExceededException(String.format(
+                    "Total portfolio cost ($%.2f) exceeds your deposit amount ($%.2f).",
+                    totalCost, deposit));
+        }
+
         Long portfolioId = portfolioRepository.findPortfolioIdByUserId(userId);
         if (portfolioId == null) portfolioId = portfolioRepository.createPortfolio(userId);
         portfolioRepository.deleteItemsByPortfolioId(portfolioId);
