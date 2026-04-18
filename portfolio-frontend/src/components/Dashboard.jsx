@@ -24,9 +24,6 @@ export default function Dashboard({ valueData, valueLoading, userId, portfolioLe
       <div className="mb-6">
         <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Portfolio value</p>
         <p className="text-3xl font-semibold text-gray-900">{fmt(valueData.totalValue)}</p>
-        {valueData.warnings?.length > 0 && (
-          <p className="text-xs text-gray-400 mt-1">Some holdings excluded — price unavailable</p>
-        )}
       </div>
 
       {valueData.holdings?.length > 0 && (

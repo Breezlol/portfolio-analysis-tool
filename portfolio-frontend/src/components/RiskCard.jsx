@@ -92,10 +92,6 @@ export default function RiskCard({ analytics, analyticsLoading }) {
       {open && <InfoBox info={INFO[open]} />}
 
       <p className="text-xs text-gray-400 mt-4">{analytics.riskExplanation}</p>
-
-      {analytics.skippedSymbols?.length > 0 && (
-        <p className="text-xs text-gray-400 mt-2">Some holdings excluded — market data unavailable.</p>
-      )}
     </div>
   );
 }
