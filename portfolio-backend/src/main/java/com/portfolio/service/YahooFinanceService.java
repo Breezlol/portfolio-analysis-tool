@@ -92,7 +92,7 @@ public class YahooFinanceService {
         try {
             String url = UriComponentsBuilder.fromHttpUrl(CHART_BASE + symbol)
                     .queryParam("interval", "1d")
-                    .queryParam("range", "6mo")
+                    .queryParam("range", "2y")
                     .toUriString();
             ResponseEntity<String> resp = restTemplate.exchange(url, HttpMethod.GET, headers(), String.class);
             JsonNode closes = objectMapper.readTree(resp.getBody())
