@@ -8,13 +8,13 @@ export default function LandingPage({ setPage }) {
         <div className="flex flex-col gap-3">
           <button
             onClick={() => setPage('create')}
-            className="w-full bg-gray-900 text-white text-sm font-medium py-3 rounded-lg hover:bg-gray-700"
+            className="w-full bg-white text-gray-900 text-sm font-medium py-3 rounded-lg border border-gray-200"
           >
             New user
           </button>
           <button
             onClick={() => setPage('load')}
-            className="w-full bg-white text-gray-900 text-sm font-medium py-3 rounded-lg border border-gray-200 hover:bg-gray-50"
+            className="w-full bg-white text-gray-900 text-sm font-medium py-3 rounded-lg border border-gray-200"
           >
             Load existing user
           </button>

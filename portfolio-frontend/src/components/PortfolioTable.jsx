@@ -12,7 +12,7 @@ export default function PortfolioTable({ portfolio, setPortfolio, valueData, use
     for (const h of valueData.holdings) priceMap[h.symbol] = h;
   }
   const hasLive = Object.keys(priceMap).length > 0;
-  const cols = hasLive ? 'grid-cols-[1fr_50px_90px_90px_110px_40px]' : 'grid-cols-[1fr_50px_110px_40px]';
+  const cols = hasLive ? 'grid-cols-[1fr_50px_90px_90px_40px]' : 'grid-cols-[1fr_50px_110px_40px]';
 
   const totalValue = hasLive
     ? valueData.totalValue
@@ -63,12 +63,12 @@ export default function PortfolioTable({ portfolio, setPortfolio, valueData, use
             <button
               onClick={handleFilter}
               disabled={filtering || !from || !to}
-              className="text-xs px-3 py-1 bg-gray-900 text-white rounded-md hover:bg-gray-700 disabled:opacity-40"
+              className="text-xs px-3 py-1 bg-white text-gray-900 rounded-md border border-gray-200 disabled:opacity-40"
             >
               Filter
             </button>
             {rangeResult && (
-              <button onClick={handleClear} className="text-xs text-gray-400 hover:text-gray-600">
+              <button onClick={handleClear} className="text-xs text-gray-400">
                 Clear
               </button>
             )}
@@ -98,15 +98,11 @@ export default function PortfolioTable({ portfolio, setPortfolio, valueData, use
             <span className="text-xs text-gray-400 uppercase tracking-widest">Qty</span>
             <span className="text-xs text-gray-400 uppercase tracking-widest">Buy price</span>
             {hasLive && <span className="text-xs text-gray-400 uppercase tracking-widest">Current</span>}
-            {hasLive && <span className="text-xs text-gray-400 uppercase tracking-widest">Gain/Loss</span>}
             <span />
           </div>
 
           {displayItems.map((s, i) => {
             const live = priceMap[s.symbol];
-            const gainPct = live ? ((live.currentPrice - live.purchasePrice) / live.purchasePrice * 100) : null;
-            const gainDollars = live ? ((live.currentPrice - live.purchasePrice) * s.quantity) : null;
-            const isPositive = gainPct !== null && gainPct >= 0;
             const portfolioIndex = portfolio.findIndex(p => p.symbol === s.symbol);
 
             return (
@@ -114,34 +110,15 @@ export default function PortfolioTable({ portfolio, setPortfolio, valueData, use
                 <span className="text-sm font-medium text-gray-900">{s.symbol}</span>
                 <span className="text-sm text-gray-700">{s.quantity}</span>
 
-                {hasLive ? (
-                  <span className="text-sm text-gray-700">{fmt(live ? live.purchasePrice : s.purchasePrice)}</span>
-                ) : (
-                  <input
-                    type="number" min="0" step="0.01" value={s.purchasePrice}
-                    onChange={e => {
-                      if (portfolioIndex === -1) return;
-                      const updated = [...portfolio];
-                      updated[portfolioIndex] = { ...updated[portfolioIndex], purchasePrice: Math.max(0, Number(e.target.value)) };
-                      setPortfolio(updated);
-                    }}
-                    className="w-full text-sm text-gray-900 border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:border-gray-400"
-                  />
-                )}
+                <span className="text-sm text-gray-700">{fmt(live ? live.purchasePrice : s.purchasePrice)}</span>
 
                 {hasLive && (
                   <span className="text-sm text-gray-700">{live ? fmt(live.currentPrice) : '—'}</span>
                 )}
 
-                {hasLive && (
-                  <span className={`text-sm font-medium ${gainPct === null ? 'text-gray-300' : isPositive ? 'text-green-600' : 'text-red-500'}`}>
-                    {gainPct === null ? '—' : `${isPositive ? '+' : ''}${gainPct.toFixed(1)}% (${fmt(gainDollars)})`}
-                  </span>
-                )}
-
                 <button
                   onClick={() => portfolioIndex !== -1 && setPortfolio(portfolio.filter((_, j) => j !== portfolioIndex))}
-                  className="text-gray-300 hover:text-gray-600 text-lg leading-none"
+                  className="text-gray-300 text-lg leading-none"
                   title="Remove"
                 >×</button>
               </div>

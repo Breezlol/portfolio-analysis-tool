@@ -10,7 +10,7 @@ export default function CreateUserPage({ form, set, setPage }) {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <button onClick={() => setPage('landing')} className="text-xs text-gray-400 hover:text-gray-600 mb-8 flex items-center gap-1">
+        <button onClick={() => setPage('landing')} className="text-xs text-gray-400 mb-8 flex items-center gap-1">
           ← Back
         </button>
         <h2 className="text-2xl font-semibold text-gray-900 mb-1">Create profile</h2>
@@ -50,7 +50,7 @@ export default function CreateUserPage({ form, set, setPage }) {
 
           <input className={inputClass} placeholder="Deposit amount ($)" type="number" min="0" value={form.depositAmount} onChange={e => set('depositAmount', e.target.value)} required />
 
-          <button type="submit" className="w-full bg-gray-900 text-white text-sm font-medium py-3 rounded-lg hover:bg-gray-700 mt-2">
+          <button type="submit" className="w-full bg-white text-gray-900 text-sm font-medium py-3 rounded-lg border border-gray-200 mt-2">
             Continue
           </button>
         </form>

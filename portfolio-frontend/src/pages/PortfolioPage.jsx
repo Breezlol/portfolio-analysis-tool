@@ -61,7 +61,7 @@ export default function PortfolioPage({ userId, setUserId, form, set, portfolio,
           </div>
           <button
             onClick={exitToLanding}
-            className="text-xs text-gray-400 hover:text-gray-600"
+            className="text-xs text-gray-400"
           >
             ← Exit
           </button>
@@ -78,7 +78,7 @@ export default function PortfolioPage({ userId, setUserId, form, set, portfolio,
           <button
             disabled={overBudget}
             onClick={handleSave}
-            className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-30"
+            className="px-5 py-2.5 bg-white text-gray-900 text-sm font-medium rounded-lg border border-gray-200 disabled:opacity-30"
           >
             Save & Analyse
           </button>
@@ -86,7 +86,7 @@ export default function PortfolioPage({ userId, setUserId, form, set, portfolio,
             <button
               onClick={() => fetchPortfolioValue(userId)}
               disabled={valueLoading}
-              className="px-5 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 disabled:opacity-40"
+              className="px-5 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg disabled:opacity-40"
             >
               {valueLoading ? 'Refreshing…' : 'Refresh Prices'}
             </button>

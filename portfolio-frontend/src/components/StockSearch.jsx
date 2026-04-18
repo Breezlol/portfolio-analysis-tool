@@ -48,7 +48,7 @@ export default function StockSearch({ onSelect, existingSymbols }) {
         <button
           onClick={search}
           disabled={searching}
-          className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40"
+          className="px-4 py-2.5 bg-white text-gray-900 text-sm font-medium rounded-lg border border-gray-200 disabled:opacity-40"
         >
           Search
         </button>
@@ -70,7 +70,7 @@ export default function StockSearch({ onSelect, existingSymbols }) {
                 <button
                   onClick={() => handleSelect(symbol, name)}
                   disabled={loading}
-                  className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                  className="text-xs font-medium px-3 py-1.5 rounded-md border border-gray-200 text-gray-600 disabled:opacity-40"
                 >
                   {loading ? '…' : already ? 'Buy more' : 'Add'}
                 </button>

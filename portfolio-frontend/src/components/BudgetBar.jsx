@@ -54,7 +54,7 @@ export default function BudgetBar({ depositAmount, totalCost, onAddFunds }) {
             />
             <button
               onClick={handleAdd}
-              className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600"
+              className="px-4 py-2 bg-white text-gray-900 text-sm font-medium rounded-lg border border-gray-200"
             >
               Add
             </button>

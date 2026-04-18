@@ -15,7 +15,7 @@ export default function PurchasePanel({ stock, onConfirm, onCancel }) {
           <p className="text-sm font-semibold text-gray-900">{stock.symbol}</p>
           <p className="text-xs text-gray-400 mt-0.5">{stock.name}</p>
         </div>
-        <button onClick={onCancel} className="text-gray-300 hover:text-gray-500 text-lg leading-none">×</button>
+        <button onClick={onCancel} className="text-gray-300 text-lg leading-none">×</button>
       </div>
 
       <div className="flex items-center justify-between mb-4">
@@ -28,7 +28,7 @@ export default function PurchasePanel({ stock, onConfirm, onCancel }) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setQty(q => Math.max(1, q - 1))}
-            className="w-7 h-7 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100 text-sm font-medium"
+            className="w-7 h-7 rounded-md border border-gray-200 text-gray-600 text-sm font-medium"
           >−</button>
           <input
             type="number"
@@ -39,7 +39,7 @@ export default function PurchasePanel({ stock, onConfirm, onCancel }) {
           />
           <button
             onClick={() => setQty(q => q + 1)}
-            className="w-7 h-7 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100 text-sm font-medium"
+            className="w-7 h-7 rounded-md border border-gray-200 text-gray-600 text-sm font-medium"
           >+</button>
         </div>
       </div>
@@ -52,13 +52,13 @@ export default function PurchasePanel({ stock, onConfirm, onCancel }) {
       <div className="flex gap-2">
         <button
           onClick={() => onConfirm(qty)}
-          className="flex-1 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700"
+          className="flex-1 py-2.5 bg-white text-gray-900 text-sm font-medium rounded-lg border border-gray-200"
         >
           Confirm Purchase
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-100"
+          className="px-4 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg"
         >
           Cancel
         </button>

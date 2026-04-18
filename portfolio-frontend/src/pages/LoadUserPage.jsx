@@ -30,7 +30,7 @@ export default function LoadUserPage({ users, setUserId, setForm, setPortfolio, 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <button onClick={() => setPage('landing')} className="text-xs text-gray-400 hover:text-gray-600 mb-8">
+        <button onClick={() => setPage('landing')} className="text-xs text-gray-400 mb-8">
           ← Back
         </button>
         <h2 className="text-2xl font-semibold text-gray-900 mb-1">Load profile</h2>
