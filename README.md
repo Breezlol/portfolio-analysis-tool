@@ -14,9 +14,10 @@ The project demonstrates object-oriented design, REST API development, data stru
 
 ## Features
 
-- Create and save user profiles
+- Create, load, and update user profiles
 - Search for real stocks via Yahoo Finance API
 - Build a portfolio by adding and removing stocks
+- Deposit-based budget tracking with over-budget protection
 - Persistent storage with MySQL
 - Portfolio value and allocation breakdown
 - Annualised volatility, Sharpe ratio, and 1-day 95% VaR
@@ -39,6 +40,12 @@ The project demonstrates object-oriented design, REST API development, data stru
 
 | Method | Path | Description |
 |--------|------|-------------|
+| POST | /users | Create user profile |
+| GET | /users | List all users |
+| GET | /users/{id} | Get user by id |
+| PUT | /users/{id} | Update user profile |
+| GET | /stocks/search?keywords=A | Search stocks via Yahoo Finance |
+| GET | /stocks/quote?symbol=AAPL | Latest quote for a symbol |
 | GET | /users/{id}/portfolio | All holdings, sorted |
 | POST | /users/{id}/portfolio | Save holdings (replaces existing) |
 | GET | /users/{id}/portfolio/value | Market value + allocation |
@@ -98,28 +105,36 @@ mvn test
 ```
 
 Tests cover:
+- `AVLTreeTest` — insert ordering, range queries, balancing
 - `MinHeapTest` — insert/extract ordering, top-k algorithm, reversed comparator, edge cases
 - `VolatilityServiceTest` — volatility calculation, Sharpe ratio, VaR, error handling
 - `AnalyticsServiceTest` — gainers/losers ranking, k > portfolio size, missing price skipping
+- `PortfolioControllerIntegrationTest` — end-to-end controller tests against H2
 
 ## Project Structure
 
 ```
 portfolio-backend/
   src/main/java/com/portfolio/
-    controller/       # REST endpoints
+    controller/       # REST endpoints + GlobalExceptionHandler
     datastructure/    # AVLTree, MinHeap
+    dto/              # PortfolioItemRequest
     entity/           # PortfolioItem, User
-    repository/       # PortfolioRepository, UserRepository
+    repository/       # BaseRepository, PortfolioRepository, UserRepository
     service/          # YahooFinanceService, AnalyticsService,
-                      # PortfolioService, VolatilityService
+                      # PortfolioService, VolatilityService,
+                      # BudgetExceededException
   src/main/resources/
     schema.sql        # Database table definitions
     application.properties  # Config (credentials via env vars)
 
 portfolio-frontend/
   src/
-    App.jsx           # Main UI
+    App.jsx           # Top-level state + routing
     main.jsx          # React entry point
+    pages/            # LandingPage, CreateUserPage, LoadUserPage, PortfolioPage
+    components/       # StockSearch, PortfolioTable, Dashboard, RiskCard,
+                      # BudgetBar, PurchasePanel, TopMovers
+    utils/            # format.js (currency/number formatting)
   vite.config.js      # Dev server + API proxy config
 ```
